@@ -17,6 +17,10 @@ lexer_test:lexer_test.o $(DEPS)
 %.o:%.cc
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
 
+clean:
+	rm -rf *_test *.o
+
 .PHONY:all
 .PHONY:prepare-dep
 .PHONY:test
+.PHONY:clean

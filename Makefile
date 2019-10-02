@@ -4,28 +4,33 @@ LDFLAGS=
 
 SRC=$(notdir $(wildcard src/*.cc))
 OBJ=$(patsubst %.cc,objs/%.o,$(SRC))
+HEADERS=$(wildcard include/*.h)
 
-all:prepare-dep autumn unitest
+all:prepare-dep libautumn unitest autumn
 
 prepare-dep:
 	@mkdir -p objs
 	@mkdir -p lib
 
-autumn:libautumn.a
+libautumn:libautumn.a
 	@mv $^ lib
 
 libautumn.a:$(OBJ)
 	ar -r $@ $^ $(LDFLAGS)
 
-objs/%.o:src/%.cc
+objs/%.o:src/%.cc $(HEADERS)
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
 
 
 unitest:
 	$(MAKE) -C unitest
 
+autumn:repl/autumn.cc libautumn.a
+	$(CXX) $(CXXFLAGS) -o $@ $< -L./lib -lautumn
+
 clean:
 	rm -rf lib objs
+	$(MAKE) -C unitest clean
 
 .PHONY:all
 .PHONY:prepare-dep

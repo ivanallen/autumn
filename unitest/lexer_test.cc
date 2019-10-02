@@ -16,12 +16,72 @@ TEST(Lexer, TestSymbol) {
         {Token::RBRACE, "}"},
         {Token::COMMA, ","},
         {Token::SEMICOLON, ";"},
+        {Token::END, ""},
     };
 
     Lexer lexer(input);
 
     for (auto& expect_token: expect_tokens) {
         auto token = lexer.next_token();
-        EXPECT_EQ(expect_token, token);
+        EXPECT_EQ(expect_token.literal, token.literal);
+        EXPECT_EQ(expect_token.type, token.type);
+    }
+}
+
+TEST(Lexer, TestIdentity) {
+    std::string input = R"(let five = 5;
+let ten = 10;
+let add = fn(x, y) {
+    return x + y;
+};
+let result = add(five, ten);)";
+
+    Token expect_tokens[] = {
+        {Token::LET, "let"},
+        {Token::IDENT, "five"},
+        {Token::ASSIGN, "="},
+        {Token::INT, "5"},
+        {Token::SEMICOLON, ";"},
+        {Token::LET, "let"},
+        {Token::IDENT, "ten"},
+        {Token::ASSIGN, "="},
+        {Token::INT, "10"},
+        {Token::SEMICOLON, ";"},
+        {Token::LET, "let"},
+        {Token::IDENT, "add"},
+        {Token::ASSIGN, "="},
+        {Token::FUNCTION, "fn"},
+        {Token::LPAREN, "("},
+        {Token::IDENT, "x"},
+        {Token::COMMA, ","},
+        {Token::IDENT, "y"},
+        {Token::RPAREN, ")"},
+        {Token::LBRACE, "{"},
+        {Token::RETURN, "return"},
+        {Token::IDENT, "x"},
+        {Token::PLUS, "+"},
+        {Token::IDENT, "y"},
+        {Token::SEMICOLON, ";"},
+        {Token::RBRACE, "}"},
+        {Token::SEMICOLON, ";"},
+        {Token::LET, "let"},
+        {Token::IDENT, "result"},
+        {Token::ASSIGN, "="},
+        {Token::IDENT, "add"},
+        {Token::LPAREN, "("},
+        {Token::IDENT, "five"},
+        {Token::COMMA, ","},
+        {Token::IDENT, "ten"},
+        {Token::RPAREN, ")"},
+        {Token::SEMICOLON, ";"},
+        {Token::END, ""},
+    };
+
+    Lexer lexer(input);
+
+    for (auto& expect_token: expect_tokens) {
+        auto token = lexer.next_token();
+        EXPECT_EQ(expect_token.literal, token.literal);
+        EXPECT_EQ(expect_token.type, token.type);
     }
 }

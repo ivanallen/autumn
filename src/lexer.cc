@@ -1,32 +1,61 @@
 #include "lexer.h"
+#include <algorithm>
 namespace autumn {
 
 Lexer::Lexer(const std::string& input) :
     _input(input) {
+    read_char();
 }
 
 Token Lexer::next_token() {
-    read_char();
+    skip_whitespace();
+    Token token;
+
     switch (_ch) {
     case '=':
-        return Token{Token::ASSIGN, "="};
+        token = Token{Token::ASSIGN, "="};
+        break;
     case '+':
-        return Token{Token::PLUS, "+"};
+        token = Token{Token::PLUS, "+"};
+        break;
+    case '-':
+        token = Token{Token::MINUS, "-"};
+        break;
     case '(':
-        return Token{Token::LPAREN, "("};
+        token = Token{Token::LPAREN, "("};
+        break;
     case ')':
-        return Token{Token::RPAREN, ")"};
+        token = Token{Token::RPAREN, ")"};
+        break;
     case '{':
-        return Token{Token::LBRACE, "{"};
+        token = Token{Token::LBRACE, "{"};
+        break;
     case '}':
-        return Token{Token::RBRACE, "}"};
+        token = Token{Token::RBRACE, "}"};
+        break;
     case ',':
-        return Token{Token::COMMA, ","};
+        token = Token{Token::COMMA, ","};
+        break;
     case ';':
-        return Token{Token::SEMICOLON, ";"};
+        token = Token{Token::SEMICOLON, ";"};
+        break;
+    case 0:
+        token = Token{Token::END, ""};
+        break;
+    default:
+        if (is_letter(_ch)) {
+            auto ident = read_identifier();
+            return Token{Token::lookup(ident), ident};
+        } else if (is_digital(_ch)) {
+            auto num = read_number();
+            return Token{Token::INT, num};
+        } else {
+            return Token{Token::ILLEGAL, ""};
+        }
     }
 
-    return Token();
+    read_char();
+    return token;
 }
 
 void Lexer::read_char() {
@@ -37,6 +66,39 @@ void Lexer::read_char() {
     }
     _pos = _read_pos;
     ++_read_pos;
+}
+
+bool Lexer::is_letter(char c) const {
+    return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_';
+}
+
+bool Lexer::is_digital(char c) const {
+    return '0' <= c && c <= '9';
+}
+
+void Lexer::skip_whitespace() {
+    static char whitespace[] = {' ', '\n', '\r', '\t'};
+    while (std::find(std::begin(whitespace),
+            std::end(whitespace),
+            _ch) != std::end(whitespace)) {
+        read_char();
+    }
+}
+
+std::string Lexer::read_identifier() {
+    int pos = _pos;
+    while (is_letter(_ch)) {
+        read_char();
+    }
+    return _input.substr(pos, _pos - pos);
+}
+
+std::string Lexer::read_number() {
+    int pos = _pos;
+    while (is_digital(_ch)) {
+        read_char();
+    }
+    return _input.substr(pos, _pos - pos);
 }
 
 } // namespace autumn
