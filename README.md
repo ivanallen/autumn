@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/ivanallen/autumn.svg?branch=master)](https://travis-ci.com/ivanallen/autumn)
+
 # Autumn
 
-An interpreter to learn
+An easy interpreter to learn.
