@@ -13,13 +13,48 @@ Token Lexer::next_token() {
 
     switch (_ch) {
     case '=':
-        token = Token{Token::ASSIGN, "="};
+        if (peek_char() == '=') {
+            read_char();
+            token = Token{Token::EQ, "=="};
+        } else {
+            token = Token{Token::ASSIGN, "="};
+        }
         break;
     case '+':
         token = Token{Token::PLUS, "+"};
         break;
     case '-':
         token = Token{Token::MINUS, "-"};
+        break;
+    case '*':
+        token = Token{Token::ASTERISK, "*"};
+        break;
+    case '/':
+        token = Token{Token::SLASH, "/"};
+        break;
+    case '!':
+        if (peek_char() == '=') {
+            read_char();
+            token = Token{Token::NEQ, "!="};
+        } else {
+            token = Token{Token::BANG, "!"};
+        }
+        break;
+    case '<':
+        if (peek_char() == '=') {
+            read_char();
+            token = Token{Token::LTE, "<="};
+        } else {
+            token = Token{Token::LT, "<"};
+        }
+        break;
+    case '>':
+        if (peek_char() == '=') {
+            read_char();
+            token = Token{Token::GTE, ">="};
+        } else {
+            token = Token{Token::GT, ">"};
+        }
         break;
     case '(':
         token = Token{Token::LPAREN, "("};
@@ -66,6 +101,14 @@ void Lexer::read_char() {
     }
     _pos = _read_pos;
     ++_read_pos;
+}
+
+char Lexer::peek_char() const {
+    if (_read_pos >= _input.length()) {
+        return 0;
+    } else {
+        return _input[_read_pos];
+    }
 }
 
 bool Lexer::is_letter(char c) const {

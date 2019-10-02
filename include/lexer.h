@@ -8,6 +8,7 @@ public:
     Token next_token();
 private:
     void read_char();
+    char peek_char() const;
     bool is_letter(char c) const;
     bool is_digital(char c) const;
     std::string read_identifier();
