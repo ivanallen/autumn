@@ -1,0 +1,5 @@
+*.swo
+*.swp
+*.o
+*_test
+libautumn.a
