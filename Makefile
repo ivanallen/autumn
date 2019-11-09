@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=-g -std=c++11 -I./include
+CXXFLAGS=-g -std=c++11 -Werror -I./include
 LDFLAGS=
 
 SRC=$(notdir $(wildcard src/*.cc))
@@ -16,7 +16,7 @@ libautumn:libautumn.a
 	@mv $^ lib
 
 libautumn.a:$(OBJ)
-	ar -r $@ $^ $(LDFLAGS)
+	ar -r $@ $^
 
 objs/%.o:src/%.cc $(HEADERS)
 	$(CXX) -o $@ -c $< $(CXXFLAGS)

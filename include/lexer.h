@@ -1,3 +1,5 @@
+#pragma once
+
 #include "token.h"
 
 namespace autumn {
