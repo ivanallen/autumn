@@ -26,9 +26,12 @@ $ scl enable devtoolset-8 bash
 {{Please complete me}}
 ```
 
-### Build & Run
+### Build & Test
 
 ```
 $ make
 ```
 
+## Contact
+
+QQ Group: 610441700
