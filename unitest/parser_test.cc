@@ -36,3 +36,26 @@ TEST(Parser, TestLetStatment) {
         EXPECT_EQ(std::get<0>(test), let_stmt.identifier()->value());
     }
 }
+
+TEST(Parser, TestErrorLetStatment) {
+    std::string input = R"(
+        let x 5;
+        let = 10;
+        let 838383;
+    )";
+
+    Parser parser;
+
+    auto program = parser.parse(input);
+    ASSERT_TRUE(program != nullptr);
+
+    auto& statments = program->statments();
+    auto& errors = parser.errors();
+    EXPECT_EQ(3u, errors.size());
+
+    for (auto& error : errors) {
+        std::cout << error << std::endl;
+    }
+
+    ASSERT_TRUE(statments.empty());
+}
