@@ -11,7 +11,7 @@ namespace autumn {
 // 抽象节点
 class Node {
 public:
-    virtual std::string token_literal() = 0;
+    virtual std::string token_literal() const = 0;
 
     template<typename T>
     const T* cast() const {
@@ -37,7 +37,7 @@ public:
         _token(token), _value(value) {
     }
 
-    std::string token_literal() override {
+    std::string token_literal() const override {
         return _token.literal;
     }
 private:
@@ -51,7 +51,7 @@ public:
         _token(token) {
     }
 
-    std::string token_literal() override {
+    std::string token_literal() const override {
         return _token.literal;
     }
 
@@ -61,6 +61,14 @@ public:
 
     void set_expression(Identifier* expression) {
         _expression.reset(expression);
+    }
+
+    const Identifier* identifier() const {
+        return _identifier.get();
+    }
+
+    const Expression* expression() const {
+        return _expression.get();
     }
 private:
     Token _token;
