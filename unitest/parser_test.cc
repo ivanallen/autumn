@@ -31,9 +31,10 @@ TEST(Parser, TestLetStatment) {
         auto& test = tests[i];
         auto& stmt = statments[i];
         ASSERT_STREQ("let", stmt->token_literal().c_str());
-        auto& let_stmt = stmt->cast<LetStatment>();
-        EXPECT_EQ(std::get<0>(test), let_stmt.identifier()->token_literal());
-        EXPECT_EQ(std::get<0>(test), let_stmt.identifier()->value());
+        auto let_stmt = stmt->cast<LetStatment>();
+        ASSERT_TRUE(let_stmt != nullptr);
+        EXPECT_EQ(std::get<0>(test), let_stmt->identifier()->token_literal());
+        EXPECT_EQ(std::get<0>(test), let_stmt->identifier()->value());
     }
 }
 
@@ -58,4 +59,30 @@ TEST(Parser, TestErrorLetStatment) {
     }
 
     ASSERT_TRUE(statments.empty());
+}
+
+TEST(Parser, TestReturnStatment) {
+    std::string input = R"(
+        return 5;
+        return 10;
+        return 938383;
+    )";
+
+    Parser parser;
+
+    auto program = parser.parse(input);
+    ASSERT_TRUE(program != nullptr);
+
+    auto& statments = program->statments();
+    auto& errors = parser.errors();
+
+    EXPECT_TRUE(errors.empty());
+    ASSERT_EQ(3u, statments.size());
+
+
+    for (auto& stmt : statments) {
+        EXPECT_STREQ("return", stmt->token_literal().c_str());
+        auto return_stmt = stmt->cast<ReturnStatment>();
+        EXPECT_TRUE(return_stmt != nullptr);
+    }
 }

@@ -23,6 +23,7 @@ private:
     std::unique_ptr<Program> parse();
     std::unique_ptr<Statment> parse_statment();
     std::unique_ptr<Statment> parse_let_statment();
+    std::unique_ptr<Statment> parse_return_statment();
 private:
     Lexer* _lexer = nullptr;
     Token _current_token{Token::ILLEGAL, ""};

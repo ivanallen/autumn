@@ -67,7 +67,8 @@ std::unique_ptr<Statment> Parser::parse_statment() {
     switch (_current_token.type) {
     case Token::LET:
         return parse_let_statment();
-        break;
+    case Token::RETURN:
+        return parse_return_statment();
     }
 
     return nullptr;
@@ -87,6 +88,17 @@ std::unique_ptr<Statment> Parser::parse_let_statment() {
     if (!expect_peek(Token::ASSIGN)) {
         return nullptr;
     }
+
+    // 表达式解析部分，暂时跳过
+    while (!current_token_is(Token::SEMICOLON)) {
+        next_token();
+    }
+
+    return std::unique_ptr<Statment>(std::move(stmt));
+}
+
+std::unique_ptr<Statment> Parser::parse_return_statment() {
+    std::unique_ptr<ReturnStatment> stmt(new ReturnStatment(_current_token));
 
     // 表达式解析部分，暂时跳过
     while (!current_token_is(Token::SEMICOLON)) {
