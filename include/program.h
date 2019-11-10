@@ -15,41 +15,12 @@ public:
     const T* cast() const {
         return dynamic_cast<const T*>(this);
     };
-
-    template<typename T>
-    const T& cast() {
-        return dynamic_cast<T&>(*this);
-    };
 };
 
 // 语句
-class Statment : public Node {};
-
-// 表达式
-class Expression : public Node {};
-
-// 标识符
-class Identifier : public Expression {
+class Statment : public Node {
 public:
-    Identifier(const Token& token, const std::string& value) :
-        _token(token), _value(value) {
-    }
-
-    std::string token_literal() const override {
-        return _token.literal;
-    }
-
-    const std::string& value() const {
-        return _value;
-    }
-private:
-    Token _token;
-    std::string _value;
-};
-
-class LetStatment : public Statment {
-public:
-    LetStatment(const Token& token) :
+    Statment(const Token& token) :
         _token(token) {
     }
 
@@ -57,12 +28,47 @@ public:
         return _token.literal;
     }
 
-    void set_identifier(Identifier* identifier) {
-        _identifier.reset(identifier);
+protected:
+    Token _token;
+};
+
+// 表达式
+class Expression : public Node {
+public:
+    Expression(const Token& token) :
+        _token(token) {
     }
 
-    void set_expression(Identifier* expression) {
-        _expression.reset(expression);
+    std::string token_literal() const override {
+        return _token.literal;
+    }
+
+protected:
+    Token _token;
+};
+
+// 标识符
+class Identifier : public Expression {
+public:
+    Identifier(const Token& token, const std::string& value) :
+        Expression(token), _value(value) {
+    }
+
+    const std::string& value() const {
+        return _value;
+    }
+
+private:
+    std::string _value;
+};
+
+class LetStatment : public Statment {
+public:
+    friend class Parser;
+    using Statment::Statment;
+
+    std::string token_literal() const override {
+        return _token.literal;
     }
 
     const Identifier* identifier() const {
@@ -72,9 +78,35 @@ public:
     const Expression* expression() const {
         return _expression.get();
     }
+
 private:
-    Token _token;
+    void set_identifier(Identifier* identifier) {
+        _identifier.reset(identifier);
+    }
+
+    void set_expression(Identifier* expression) {
+        _expression.reset(expression);
+    }
+
+private:
     std::unique_ptr<Identifier> _identifier;
+    std::unique_ptr<Expression> _expression;
+};
+
+class ReturnStatment : public Statment {
+public:
+    friend class Parser;
+    using Statment::Statment;
+
+    const Expression* expression() const {
+        return _expression.get();
+    }
+
+private:
+    void set_expression(Identifier* expression) {
+        _expression.reset(expression);
+    }
+private:
     std::unique_ptr<Expression> _expression;
 };
 
