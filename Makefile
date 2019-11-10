@@ -1,4 +1,3 @@
-CXX=g++
 CXXFLAGS=-g -std=c++11 -Werror -I./include
 LDFLAGS=
 
