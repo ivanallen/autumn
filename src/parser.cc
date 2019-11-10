@@ -2,6 +2,9 @@
 
 namespace autumn {
 
+const std::vector<std::string>& Parser::errors() const {
+    return _errors;
+}
 std::unique_ptr<Program> Parser::parse(const std::string& input) {
     Lexer lexer(input);
     _lexer = &lexer;
@@ -31,12 +34,24 @@ void Parser::next_token() {
     _peek_token = _lexer->next_token();
 }
 
+void Parser::peek_error(Token::Type type) {
+    std::string error = "expected next token to be "
+        + Token::to_string(type) 
+        + ", got "
+        + _peek_token.to_string()
+        + " instead. literal `"
+        + _peek_token.literal
+        + "`";
+    _errors.push_back(std::move(error));
+}
+
 bool Parser::expect_peek(Token::Type type) {
-    if (_peek_token.type == type) {
+    if (peek_token_is(type)) {
         next_token();
         return true;
     }
 
+    peek_error(type);
     return false;
 }
 

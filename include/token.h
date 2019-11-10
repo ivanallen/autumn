@@ -42,6 +42,10 @@ struct Token {
     static std::map<std::string, Token::Type> keywords;
     static Type lookup(const std::string& token);
 
+    static const std::string& to_string(Token::Type type);
+
+    const std::string& to_string() const;
+
     Type type;
     std::string literal;
 

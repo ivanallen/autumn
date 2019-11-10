@@ -56,6 +56,14 @@ Token::Type Token::lookup(const std::string& token) {
     return Token::IDENT;
 }
 
+const std::string& Token::to_string(Token::Type type) {
+    return s_token_type[type];
+}
+
+const std::string& Token::to_string() const {
+    return s_token_type[type];
+}
+
 std::ostream& operator<<(std::ostream& out, const Token& token) {
     auto it = s_token_type.find(token.type);
     std::string type = "ERROR";
