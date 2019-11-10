@@ -26,7 +26,7 @@ std::unique_ptr<Program> Parser::parse() {
         next_token();
     }
 
-    return std::unique_ptr<Program>(std::move(program));
+    return program;
 }
 
 void Parser::next_token() {
@@ -94,7 +94,7 @@ std::unique_ptr<Statment> Parser::parse_let_statment() {
         next_token();
     }
 
-    return std::unique_ptr<Statment>(std::move(stmt));
+    return stmt;
 }
 
 std::unique_ptr<Statment> Parser::parse_return_statment() {
@@ -105,7 +105,7 @@ std::unique_ptr<Statment> Parser::parse_return_statment() {
         next_token();
     }
 
-    return std::unique_ptr<Statment>(std::move(stmt));
+    return stmt;
 }
 
 };
