@@ -119,4 +119,23 @@ TEST(Parser, TestIdentifierExpression) {
     EXPECT_STREQ("foobar", ident->value().c_str());
 }
 
+TEST(Parser, TestIntegerLiteralExpression) {
+    // 类似于这各只有一个标志符的，也是表达式
+    std::string input = "123;";
+    Parser parser;
+
+    auto program = parser.parse(input);
+    ASSERT_TRUE(program != nullptr);
+    auto& statments = program->statments();
+    ASSERT_EQ(1u, statments.size());
+
+    auto stmt = statments[0]->cast<ExpressionStatment>();
+    ASSERT_TRUE(stmt != nullptr);
+    auto exp = stmt->expression();
+    ASSERT_TRUE(exp != nullptr);
+    auto int_literal = exp->cast<IntegerLiteral>();
+    ASSERT_TRUE(int_literal != nullptr);
+    EXPECT_STREQ("123", int_literal->token_literal().c_str());
+    EXPECT_EQ(123, int_literal->value());
+}
 }

@@ -67,6 +67,25 @@ private:
     std::string _value;
 };
 
+class IntegerLiteral : public Expression {
+public:
+    IntegerLiteral (const Token& token) :
+        Expression(token) {
+        _value = std::stoi(token.literal);
+    }
+
+    std::string to_string() const override {
+        return token_literal();
+    }
+
+    int value() const {
+        return _value;
+    }
+
+private:
+    int _value;
+};
+
 class LetStatment : public Statment {
 public:
     friend class Parser;
