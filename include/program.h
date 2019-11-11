@@ -128,7 +128,7 @@ public:
     }
 
 private:
-    void set_expression(Identifier* expression) {
+    void set_expression(Expression* expression) {
         _expression.reset(expression);
     }
 private:
@@ -151,7 +151,7 @@ public:
         return ret;
     }
 private:
-    void set_expression(Identifier* expression) {
+    void set_expression(Expression* expression) {
         _expression.reset(expression);
     }
 private:

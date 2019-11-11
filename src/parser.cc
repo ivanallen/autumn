@@ -2,14 +2,20 @@
 
 namespace autumn {
 
+Parser::Parser() {
+    _prefix_parse_funcs[Token::IDENT] = std::bind(&Parser::parse_identifier, this);
+}
+
 const std::vector<std::string>& Parser::errors() const {
     return _errors;
 }
+
 std::unique_ptr<Program> Parser::parse(const std::string& input) {
     Lexer lexer(input);
     _lexer = &lexer;
-    _current_token = Token{Token::ILLEGAL, ""};
-    _peek_token = Token{Token::ILLEGAL, ""};
+
+    next_token();
+    next_token();
 
     return parse();
 }
@@ -17,7 +23,6 @@ std::unique_ptr<Program> Parser::parse(const std::string& input) {
 std::unique_ptr<Program> Parser::parse() {
     std::unique_ptr<Program> program(new Program);
 
-    next_token();
     while (!current_token_is(Token::END)) {
         auto stmt = parse_statment();
         if (stmt != nullptr) {
@@ -64,11 +69,15 @@ bool Parser::peek_token_is(Token::Type type) const {
 }
 
 std::unique_ptr<Statment> Parser::parse_statment() {
+    // debug
+    // std::cout << "parse:" << _current_token << std::endl;
     switch (_current_token.type) {
     case Token::LET:
         return parse_let_statment();
     case Token::RETURN:
         return parse_return_statment();
+    default:
+        return parse_expression_statment();
     }
 
     return nullptr;
@@ -106,6 +115,34 @@ std::unique_ptr<Statment> Parser::parse_return_statment() {
     }
 
     return stmt;
+}
+
+std::unique_ptr<Statment> Parser::parse_expression_statment() {
+    std::unique_ptr<ExpressionStatment> stmt(new ExpressionStatment(_current_token));
+
+    auto expression = parse_expression(Operand::LOWEST);
+    stmt->set_expression(expression.release());
+
+    if (peek_token_is(Token::SEMICOLON)) {
+        next_token();
+    }
+    return stmt;
+}
+
+std::unique_ptr<Expression> Parser::parse_expression(Operand op) {
+    auto it = _prefix_parse_funcs.find(_current_token.type);
+    if (it == _prefix_parse_funcs.end()) {
+        return nullptr;
+    }
+
+    return it->second();
+}
+
+std::unique_ptr<Expression> Parser::parse_identifier() {
+    return std::unique_ptr<Expression>(new Identifier(
+        _current_token,
+        _current_token.literal
+    ));
 }
 
 };
