@@ -10,6 +10,7 @@ namespace autumn {
 class Node {
 public:
     virtual std::string token_literal() const = 0;
+    virtual std::string to_string() const = 0;
 
     template<typename T>
     const T* cast() const {
@@ -54,6 +55,10 @@ public:
         Expression(token), _value(value) {
     }
 
+    std::string to_string() const override {
+        return _value;
+    }
+
     const std::string& value() const {
         return _value;
     }
@@ -69,6 +74,17 @@ public:
 
     std::string token_literal() const override {
         return _token.literal;
+    }
+
+    std::string to_string() const override {
+        std::string ret = token_literal()
+            + ' ' + identifier()->to_string()
+            + " = ";
+        if (_expression != nullptr) {
+            ret += _expression->to_string();
+        }
+        ret += ';';
+        return ret;
     }
 
     const Identifier* identifier() const {
@@ -102,6 +118,38 @@ public:
         return _expression.get();
     }
 
+    std::string to_string() const override {
+        std::string ret = token_literal() + ' ';
+        if (_expression != nullptr) {
+            ret += _expression->to_string();
+        }
+        ret += ';';
+        return ret;
+    }
+
+private:
+    void set_expression(Identifier* expression) {
+        _expression.reset(expression);
+    }
+private:
+    std::unique_ptr<Expression> _expression;
+};
+
+class ExpressionStatment : public Statment {
+public:
+    friend class Parser;
+    using Statment::Statment;
+    const Expression* expression() const {
+        return _expression.get();
+    }
+
+    std::string to_string() const override {
+        std::string ret;
+        if (_expression != nullptr) {
+            ret = _expression->to_string();
+        }
+        return ret;
+    }
 private:
     void set_expression(Identifier* expression) {
         _expression.reset(expression);
@@ -115,6 +163,14 @@ public:
     friend class Parser;
     const std::vector<std::unique_ptr<Statment>>& statments() const {
         return _statments;
+    }
+
+    std::string to_string() const {
+        std::string ret;
+        for (auto& stmt : _statments) {
+            ret += stmt->to_string();
+        }
+        return ret;
     }
 
 private:
