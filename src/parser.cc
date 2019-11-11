@@ -4,6 +4,7 @@ namespace autumn {
 
 Parser::Parser() {
     _prefix_parse_funcs[Token::IDENT] = std::bind(&Parser::parse_identifier, this);
+    _prefix_parse_funcs[Token::INT] = std::bind(&Parser::parse_integer_literal, this);
 }
 
 const std::vector<std::string>& Parser::errors() const {
@@ -145,4 +146,10 @@ std::unique_ptr<Expression> Parser::parse_identifier() {
     ));
 }
 
-};
+std::unique_ptr<Expression> Parser::parse_integer_literal() {
+    return std::unique_ptr<Expression>(new IntegerLiteral(
+        _current_token
+    ));
+}
+
+} // namespace autumn
