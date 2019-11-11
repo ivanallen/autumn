@@ -62,8 +62,6 @@ TEST(Parser, TestErrorLetStatment) {
     for (auto& error : errors) {
         std::cout << error << std::endl;
     }
-
-    ASSERT_TRUE(statments.empty());
 }
 
 TEST(Parser, TestReturnStatment) {
@@ -99,6 +97,26 @@ TEST(Parser, TestString) {
     stmt->_expression.reset(new Identifier({Token::IDENT, "another_var"}, "another_var"));
     p._statments.emplace_back(stmt);
     EXPECT_STREQ("let my_var = another_var;", p.to_string().c_str());
+}
+
+TEST(Parser, TestIdentifierExpression) {
+    // 类似于这各只有一个标志符的，也是表达式
+    std::string input = "foobar;";
+    Parser parser;
+
+    auto program = parser.parse(input);
+    ASSERT_TRUE(program != nullptr);
+    auto& statments = program->statments();
+    ASSERT_EQ(1u, statments.size());
+
+    auto stmt = statments[0]->cast<ExpressionStatment>();
+    ASSERT_TRUE(stmt != nullptr);
+    auto exp = stmt->expression();
+    ASSERT_TRUE(exp != nullptr);
+    auto ident = exp->cast<Identifier>();
+    ASSERT_TRUE(ident != nullptr);
+    EXPECT_STREQ("foobar", ident->token_literal().c_str());
+    EXPECT_STREQ("foobar", ident->value().c_str());
 }
 
 }
