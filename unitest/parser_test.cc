@@ -2,9 +2,14 @@
 #include <tuple>
 #include <gtest/gtest.h>
 
+// for test
+#define private public
+
 #include "parser.h"
 
 using namespace autumn;
+
+namespace {
 
 TEST(Parser, TestLetStatment) {
     std::string input = R"(
@@ -85,4 +90,15 @@ TEST(Parser, TestReturnStatment) {
         auto return_stmt = stmt->cast<ReturnStatment>();
         EXPECT_TRUE(return_stmt != nullptr);
     }
+}
+
+TEST(Parser, TestString) {
+    Program p;
+    auto stmt = new LetStatment({Token::LET, "let"});
+    stmt->_identifier.reset(new Identifier({Token::IDENT, "my_var"}, "my_var"));
+    stmt->_expression.reset(new Identifier({Token::IDENT, "another_var"}, "another_var"));
+    p._statments.emplace_back(stmt);
+    EXPECT_STREQ("let my_var = another_var;", p.to_string().c_str());
+}
+
 }
