@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -12,7 +13,7 @@ namespace autumn {
 
 class Parser {
 public:
-    enum Operand {
+    enum Precedence {
         UNKNOWN = 0,
         LOWEST,
         EQUALS, // ==
@@ -24,7 +25,7 @@ public:
     };
 public:
     Parser();
-    std::unique_ptr<Program> parse(const std::string& input);
+    std::unique_ptr<ast::Program> parse(const std::string& input);
     const std::vector<std::string>& errors() const;
 private:
     void next_token();
@@ -32,22 +33,25 @@ private:
     bool current_token_is(Token::Type type) const;
     bool peek_token_is(Token::Type type) const;
     void peek_error(Token::Type type);
+    Parser::Precedence current_precedence() const;
+    Parser::Precedence peek_precedence() const;
 
-    std::unique_ptr<Program> parse();
-    std::unique_ptr<Statment> parse_statment();
-    std::unique_ptr<Statment> parse_let_statment();
-    std::unique_ptr<Statment> parse_return_statment();
-    std::unique_ptr<Statment> parse_expression_statment();
+    std::unique_ptr<ast::Program> parse();
+    std::unique_ptr<ast::Statment> parse_statment();
+    std::unique_ptr<ast::Statment> parse_let_statment();
+    std::unique_ptr<ast::Statment> parse_return_statment();
+    std::unique_ptr<ast::Statment> parse_expression_statment();
 
-    std::unique_ptr<Expression> parse_expression(Operand op);
+    std::unique_ptr<ast::Expression> parse_expression(Precedence precedence);
 private:
     // 注册函数
-    std::unique_ptr<Expression> parse_identifier();
-    std::unique_ptr<Expression> parse_integer_literal();
-    std::unique_ptr<Expression> parse_prefix_expression();
+    std::unique_ptr<ast::Expression> parse_identifier();
+    std::unique_ptr<ast::Expression> parse_integer_literal();
+    std::unique_ptr<ast::Expression> parse_prefix_expression();
+    std::unique_ptr<ast::Expression> parse_infix_expression(ast::Expression* left);
 private:
-    using PrefixParseFunc = std::function<std::unique_ptr<Expression>()>;
-    using InfixParseFunc = std::function<std::unique_ptr<Expression>(const Expression* expression)>;
+    using PrefixParseFunc = std::function<std::unique_ptr<ast::Expression>()>;
+    using InfixParseFunc = std::function<std::unique_ptr<ast::Expression>(ast::Expression* expression)>;
 
     Lexer* _lexer = nullptr;
     Token _current_token{Token::ILLEGAL, ""};

@@ -8,6 +8,7 @@
 #include "parser.h"
 
 using namespace autumn;
+using namespace autumn::ast;
 
 namespace {
 
@@ -140,8 +141,8 @@ TEST(Parser, TestIntegerLiteralExpression) {
 
 TEST(Parser, TestParsingPrefixExpression) {
     std::vector<std::tuple<std::string, std::string, int>> tests = {
-        {"!5", "!", 5},
-        {"-15", "-", 15},
+        {"!5;", "!", 5},
+        {"-15;", "-", 15},
     };
 
     Parser parser;
@@ -171,6 +172,57 @@ TEST(Parser, TestParsingPrefixExpression) {
         auto int_literal = right->cast<IntegerLiteral>();
         ASSERT_TRUE(int_literal != nullptr);
         EXPECT_EQ(val, int_literal->value());
+    }
+}
+
+TEST(Parser, TestParsingInfixExpression) {
+    std::vector<std::tuple<std::string, int, std::string, int>> tests = {
+        {"5 + 5;", 5, "+", 5},
+        {"5 - 5;", 5, "-", 5},
+        {"5 * 5;", 5, "*", 5},
+        {"5 / 5;", 5, "/", 5},
+        {"5 > 5;", 5, ">", 5},
+        {"5 < 5;", 5, "<", 5},
+        {"5 == 5;", 5, "==", 5},
+        {"5 != 5;", 5, "!=", 5},
+    };
+
+    Parser parser;
+
+    for (auto& test : tests) {
+        auto& input = std::get<0>(test);
+        auto left_val = std::get<1>(test);
+        auto& op = std::get<2>(test);
+        auto right_val = std::get<3>(test);
+
+        auto program = parser.parse(input);
+        auto& errors = parser.errors();
+        for (auto& error : errors) {
+            std::cout << error << std::endl;
+        }
+        ASSERT_TRUE(program != nullptr);
+        auto& statments = program->statments();
+        ASSERT_EQ(1u, statments.size());
+        auto stmt = statments[0]->cast<ExpressionStatment>();
+        ASSERT_TRUE(stmt != nullptr);
+        auto exp = stmt->expression();
+        ASSERT_TRUE(exp != nullptr);
+        auto infix_exp = exp->cast<InfixExpression>();
+        ASSERT_TRUE(infix_exp != nullptr);
+        EXPECT_EQ(op, infix_exp->op());
+
+        auto left_exp = infix_exp->left();
+        auto right_exp = infix_exp->right();
+
+        ASSERT_TRUE(left_exp != nullptr);
+        auto left_int_literal = left_exp->cast<IntegerLiteral>();
+        ASSERT_TRUE(left_int_literal != nullptr);
+        EXPECT_EQ(left_val, left_int_literal->value());
+
+        ASSERT_TRUE(right_exp != nullptr);
+        auto right_int_literal = right_exp->cast<IntegerLiteral>();
+        ASSERT_TRUE(right_int_literal != nullptr);
+        EXPECT_EQ(right_val, right_int_literal->value());
     }
 }
 

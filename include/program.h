@@ -6,6 +6,11 @@
 
 namespace autumn {
 
+class Parser;
+
+namespace ast {
+
+
 // 抽象节点
 class Node {
 public:
@@ -88,12 +93,15 @@ private:
 
 class PrefixExpression : public Expression {
 public:
-    friend class Parser;
+    friend class autumn::Parser;
     PrefixExpression(const Token& token) :
             Expression(token), _operator(token.literal) {
     }
 
     std::string to_string() const override {
+        if (_right == nullptr) {
+            return "()";
+        }
         return "(" + _operator + _right->to_string() + ")";
     }
 
@@ -113,9 +121,48 @@ private:
     std::unique_ptr<Expression> _right;
 };
 
+class InfixExpression : public Expression {
+public:
+    friend class autumn::Parser;
+    InfixExpression(const Token& token) :
+            Expression(token), _operator(token.literal) {
+    }
+
+    std::string to_string() const override {
+        if (_left == nullptr || _right == nullptr) {
+            return "()";
+        }
+        return "(" + _left->to_string() + _operator + _right->to_string() + ")";
+    }
+
+    const std::string& op() const {
+        return _operator;
+    }
+
+    const Expression* left() const {
+        return _left.get();
+    }
+
+    const Expression* right() const {
+        return _right.get();
+    }
+private:
+    void set_left(Expression* expression) {
+        _left.reset(expression);
+    }
+
+    void set_right(Expression* expression) {
+        _right.reset(expression);
+    }
+private:
+    std::string _operator;
+    std::unique_ptr<Expression> _left;
+    std::unique_ptr<Expression> _right;
+};
+
 class LetStatment : public Statment {
 public:
-    friend class Parser;
+    friend class autumn::Parser;
     using Statment::Statment;
 
     std::string token_literal() const override {
@@ -157,7 +204,7 @@ private:
 
 class ReturnStatment : public Statment {
 public:
-    friend class Parser;
+    friend class autumn::Parser;
     using Statment::Statment;
 
     const Expression* expression() const {
@@ -183,7 +230,7 @@ private:
 
 class ExpressionStatment : public Statment {
 public:
-    friend class Parser;
+    friend class autumn::Parser;
     using Statment::Statment;
     const Expression* expression() const {
         return _expression.get();
@@ -206,7 +253,7 @@ private:
 
 class Program {
 public:
-    friend class Parser;
+    friend class autumn::Parser;
     const std::vector<std::unique_ptr<Statment>>& statments() const {
         return _statments;
     }
@@ -227,4 +274,5 @@ private:
     std::vector<std::unique_ptr<Statment>> _statments;
 };
 
+} // namespace ast
 } // namespace autumn
