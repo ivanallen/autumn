@@ -57,7 +57,6 @@ TEST(Parser, TestErrorLetStatment) {
 
     auto& statments = program->statments();
     auto& errors = parser.errors();
-    EXPECT_EQ(3u, errors.size());
 
     for (auto& error : errors) {
         std::cout << error << std::endl;
@@ -138,4 +137,33 @@ TEST(Parser, TestIntegerLiteralExpression) {
     EXPECT_STREQ("123", int_literal->token_literal().c_str());
     EXPECT_EQ(123, int_literal->value());
 }
+
+TEST(Parser, TestParsingPrefixExpression) {
+    std::vector<std::tuple<std::string, std::string, int>> tests = {
+        {"!5", "!", 5},
+        {"-15", "-", 15},
+    };
+
+    Parser parser;
+
+    for (auto& test : tests) {
+        auto& input = std::get<0>(test);
+
+        auto program = parser.parse(input);
+        auto& errors = parser.errors();
+        for (auto& error : errors) {
+            std::cout << error << std::endl;
+        }
+        ASSERT_TRUE(program != nullptr);
+        auto& statments = program->statments();
+        ASSERT_EQ(1u, statments.size());
+        auto stmt = statments[0]->cast<ExpressionStatment>();
+        ASSERT_TRUE(stmt != nullptr);
+        auto exp = stmt->expression();
+        ASSERT_TRUE(exp != nullptr);
+        auto prefix_exp = exp->cast<PrefixExpression>();
+        ASSERT_TRUE(prefix_exp != nullptr);
+    }
+}
+
 }

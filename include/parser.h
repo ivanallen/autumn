@@ -44,6 +44,7 @@ private:
     // 注册函数
     std::unique_ptr<Expression> parse_identifier();
     std::unique_ptr<Expression> parse_integer_literal();
+    std::unique_ptr<Expression> parse_prefix_expression();
 private:
     using PrefixParseFunc = std::function<std::unique_ptr<Expression>()>;
     using InfixParseFunc = std::function<std::unique_ptr<Expression>(const Expression* expression)>;

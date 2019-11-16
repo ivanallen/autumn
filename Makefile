@@ -1,4 +1,4 @@
-CXXFLAGS=-g -std=c++11 -Werror -I./include
+CXXFLAGS=-g -std=c++17 -Werror -I./include
 LDFLAGS=
 
 SRC=$(notdir $(wildcard src/*.cc))

@@ -5,6 +5,8 @@ namespace autumn {
 Parser::Parser() {
     _prefix_parse_funcs[Token::IDENT] = std::bind(&Parser::parse_identifier, this);
     _prefix_parse_funcs[Token::INT] = std::bind(&Parser::parse_integer_literal, this);
+    _prefix_parse_funcs[Token::BANG] = std::bind(&Parser::parse_prefix_expression, this);
+    _prefix_parse_funcs[Token::MINUS] = std::bind(&Parser::parse_prefix_expression, this);
 }
 
 const std::vector<std::string>& Parser::errors() const {
@@ -14,6 +16,7 @@ const std::vector<std::string>& Parser::errors() const {
 std::unique_ptr<Program> Parser::parse(const std::string& input) {
     Lexer lexer(input);
     _lexer = &lexer;
+    _errors.clear();
 
     next_token();
     next_token();
@@ -133,6 +136,7 @@ std::unique_ptr<Statment> Parser::parse_expression_statment() {
 std::unique_ptr<Expression> Parser::parse_expression(Operand op) {
     auto it = _prefix_parse_funcs.find(_current_token.type);
     if (it == _prefix_parse_funcs.end()) {
+        _errors.push_back("no prefix parse function found for `" + _current_token.literal + "`");
         return nullptr;
     }
 
@@ -147,9 +151,16 @@ std::unique_ptr<Expression> Parser::parse_identifier() {
 }
 
 std::unique_ptr<Expression> Parser::parse_integer_literal() {
-    return std::unique_ptr<Expression>(new IntegerLiteral(
-        _current_token
-    ));
+    return std::unique_ptr<Expression>(new IntegerLiteral(_current_token));
+}
+
+std::unique_ptr<Expression> Parser::parse_prefix_expression() {
+    std::unique_ptr<PrefixExpression> prefix_expression(
+            new PrefixExpression(_current_token));
+    next_token();
+    auto right = parse_expression(Operand::PREFIX);
+    prefix_expression->set_right(right.release());
+    return prefix_expression;
 }
 
 } // namespace autumn
