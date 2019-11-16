@@ -91,6 +91,25 @@ private:
     int _value;
 };
 
+class BooleanLiteral : public Expression {
+public:
+    BooleanLiteral (const Token& token) :
+            Expression(token) {
+        _value = token.type == Token::TRUE;
+    }
+
+    std::string to_string() const override {
+        return token_literal();
+    }
+
+    bool value() const {
+        return _value;
+    }
+
+private:
+    bool _value;
+};
+
 class PrefixExpression : public Expression {
 public:
     friend class autumn::Parser;

@@ -254,4 +254,31 @@ TEST(Parser, TestOperatorPrecedenceParsing) {
     }
 }
 
+TEST(parser, TestBooleanLiteralExpression) {
+    std::vector<std::tuple<std::string, bool>> tests = {
+        {"true;", true},
+        {"false;", false},
+    };
+
+    Parser parser;
+
+    for (auto& test : tests) {
+        auto& input = std::get<0>(test);
+        auto expect = std::get<1>(test);
+
+        auto program = parser.parse(input);
+        ASSERT_TRUE(program != nullptr);
+        auto& statments = program->statments();
+        ASSERT_EQ(1u, statments.size());
+        auto stat = statments[0]->cast<ExpressionStatment>();
+        ASSERT_TRUE(stat != nullptr);
+        auto exp = stat->expression();
+
+        ASSERT_TRUE(exp != nullptr);
+        auto bool_literal = exp->cast<BooleanLiteral>();
+        ASSERT_TRUE(bool_literal != nullptr);
+        EXPECT_EQ(expect, bool_literal->value());
+    }
+}
+
 }

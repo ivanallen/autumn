@@ -23,6 +23,8 @@ Parser::Parser() {
     // 注册前缀解析函数
     _prefix_parse_funcs[Token::IDENT] = std::bind(&Parser::parse_identifier, this);
     _prefix_parse_funcs[Token::INT] = std::bind(&Parser::parse_integer_literal, this);
+    _prefix_parse_funcs[Token::TRUE] = std::bind(&Parser::parse_boolean_literal, this);
+    _prefix_parse_funcs[Token::FALSE] = std::bind(&Parser::parse_boolean_literal, this);
     _prefix_parse_funcs[Token::BANG] = std::bind(&Parser::parse_prefix_expression, this);
     _prefix_parse_funcs[Token::MINUS] = std::bind(&Parser::parse_prefix_expression, this);
 
@@ -186,6 +188,10 @@ std::unique_ptr<ast::Expression> Parser::parse_expression(Precedence precedence)
 
     auto left = prefix->second();
 
+    // precedence 描述的是向右结合的能力。如果 precedence 是当前最高的，到目前所
+    // 收集到的 left_exp 就不会被传递给 infix_parse_func
+    // peek_precedence 描述的是向左结合的能力。这意味着 peek_precedence 越高
+    // 当前收集的 left_exp 越容易被 peek_token 收入囊中，即继续传递给 infix_parse_func
     while (!peek_token_is(Token::SEMICOLON) && precedence < peek_precedence()) {
         auto infix = _infix_parse_funcs.find(_peek_token.type); 
         if (infix == _infix_parse_funcs.end()) {
@@ -193,6 +199,7 @@ std::unique_ptr<ast::Expression> Parser::parse_expression(Precedence precedence)
         }
 
         next_token();
+        // infix_parse_func 内部会递进 token
         auto exp = infix->second(left.release());
         left.swap(exp);
     }
@@ -211,6 +218,10 @@ std::unique_ptr<ast::Expression> Parser::parse_integer_literal() {
     return std::unique_ptr<ast::Expression>(new ast::IntegerLiteral(_current_token));
 }
 
+std::unique_ptr<ast::Expression> Parser::parse_boolean_literal() {
+    return std::unique_ptr<ast::Expression>(new ast::BooleanLiteral(_current_token));
+}
+
 std::unique_ptr<ast::Expression> Parser::parse_prefix_expression() {
     std::unique_ptr<ast::PrefixExpression> prefix_expression(
             new ast::PrefixExpression(_current_token));
@@ -223,7 +234,6 @@ std::unique_ptr<ast::Expression> Parser::parse_prefix_expression() {
 std::unique_ptr<ast::Expression> Parser::parse_infix_expression(ast::Expression* left) {
     std::unique_ptr<ast::InfixExpression> infix_expression(
             new ast::InfixExpression(_current_token));
-
 
     auto precedence = current_precedence();
     next_token();
