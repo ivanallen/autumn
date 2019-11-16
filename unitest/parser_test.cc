@@ -148,6 +148,8 @@ TEST(Parser, TestParsingPrefixExpression) {
 
     for (auto& test : tests) {
         auto& input = std::get<0>(test);
+        auto& op = std::get<1>(test);
+        auto val = std::get<2>(test);
 
         auto program = parser.parse(input);
         auto& errors = parser.errors();
@@ -163,6 +165,12 @@ TEST(Parser, TestParsingPrefixExpression) {
         ASSERT_TRUE(exp != nullptr);
         auto prefix_exp = exp->cast<PrefixExpression>();
         ASSERT_TRUE(prefix_exp != nullptr);
+        EXPECT_EQ(op, prefix_exp->op());
+        auto right = prefix_exp->right();
+        ASSERT_TRUE(right != nullptr);
+        auto int_literal = right->cast<IntegerLiteral>();
+        ASSERT_TRUE(int_literal != nullptr);
+        EXPECT_EQ(val, int_literal->value());
     }
 }
 
