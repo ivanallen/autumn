@@ -52,7 +52,7 @@ protected:
 class Identifier : public Expression {
 public:
     Identifier(const Token& token, const std::string& value) :
-        Expression(token), _value(value) {
+            Expression(token), _value(value) {
     }
 
     std::string to_string() const override {
@@ -70,7 +70,7 @@ private:
 class IntegerLiteral : public Expression {
 public:
     IntegerLiteral (const Token& token) :
-        Expression(token) {
+            Expression(token) {
         _value = std::stoi(token.literal);
     }
 
@@ -84,6 +84,33 @@ public:
 
 private:
     int _value;
+};
+
+class PrefixExpression : public Expression {
+public:
+    friend class Parser;
+    PrefixExpression(const Token& token) :
+            Expression(token), _operator(token.literal) {
+    }
+
+    std::string to_string() const override {
+        return "(" + _operator + _right->to_string() + ")";
+    }
+
+    const std::string& op() const {
+        return _operator;
+    }
+
+    const Expression* right() const {
+        return _right.get();
+    }
+private:
+    void set_right(Expression* expression) {
+        _right.reset(expression);
+    }
+private:
+    std::string _operator;
+    std::unique_ptr<Expression> _right;
 };
 
 class LetStatment : public Statment {
