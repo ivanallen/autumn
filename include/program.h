@@ -132,7 +132,13 @@ public:
         if (_left == nullptr || _right == nullptr) {
             return "()";
         }
-        return "(" + _left->to_string() + _operator + _right->to_string() + ")";
+        return "("
+                + _left->to_string()
+                + " "
+                + _operator
+                + " "
+                + _right->to_string()
+                + ")";
     }
 
     const std::string& op() const {

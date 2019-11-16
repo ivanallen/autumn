@@ -226,4 +226,32 @@ TEST(Parser, TestParsingInfixExpression) {
     }
 }
 
+TEST(Parser, TestOperatorPrecedenceParsing) {
+    std::vector<std::tuple<std::string, std::string>> tests = {
+        {"-a * b", "((-a) * b)"},
+        {"!-a", "(!(-a))"},
+        {"a + b + c", "((a + b) + c)"},
+        {"a * b * c", "((a * b) * c)"},
+        {"a * b / c", "((a * b) / c)"},
+        {"a + b / c", "(a + (b / c))"},
+        {"a + b * c + d / e - f", "(((a + (b * c)) + (d / e)) - f)"},
+        {"3 + 4; -5 * 5", "(3 + 4)((-5) * 5)"},
+        {"5 > 4 == 3 < 4", "((5 > 4) == (3 < 4))"},
+        {"5 < 4 != 3 > 4", "((5 < 4) != (3 > 4))"},
+        {"3 + 4 * 5 == 3 * 1 + 4 * 5", "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"},
+        {"3 + 4 * 5 == 3 * 1 + 4 * 5", "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"},
+    };
+
+    Parser parser;
+
+    for (auto& test : tests) {
+        auto& input = std::get<0>(test);
+        auto& expect = std::get<1>(test);
+
+        auto program = parser.parse(input);
+        ASSERT_TRUE(program != nullptr);
+        EXPECT_EQ(expect, program->to_string());
+    }
+}
+
 }
