@@ -286,12 +286,18 @@ std::unique_ptr<ast::BlockStatment> Parser::parse_block_statment() {
 
     next_token();
 
-    while (!current_token_is(Token::RBRACE)) {
+    while (!current_token_is(Token::RBRACE)
+            && !current_token_is(Token::END)) {
         auto stat = parse_statment();
         if (stat != nullptr) {
             block_statment->append(stat.release());
         }
         next_token();
+    }
+
+    if (current_token_is(Token::END)) {
+        _errors.push_back("expect token `}`, got `EOF` instead.");
+        return nullptr;
     }
     return block_statment;
 }
