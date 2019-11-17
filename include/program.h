@@ -294,7 +294,7 @@ private:
         _identifier.reset(identifier);
     }
 
-    void set_expression(Identifier* expression) {
+    void set_expression(Expression* expression) {
         _expression.reset(expression);
     }
 

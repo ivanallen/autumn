@@ -39,6 +39,8 @@ TEST(Parser, TestLetStatment) {
         let x = 5;
         let y = 10;
         let foobar = 838383;
+        let foo = true;
+        let bar = false;
     )";
 
     Parser parser;
@@ -47,12 +49,14 @@ TEST(Parser, TestLetStatment) {
     ASSERT_TRUE(program != nullptr);
 
     auto& statments = program->statments();
-    ASSERT_EQ(3u, statments.size());
+    ASSERT_EQ(5u, statments.size());
 
-    std::vector<std::tuple<std::string, std::string>> tests = {
-        std::make_tuple("x", ""),
-        std::make_tuple("y", ""),
-        std::make_tuple("foobar", ""),
+    std::vector<std::tuple<std::string, std::any>> tests = {
+        std::make_tuple("x", 5),
+        std::make_tuple("y", 10),
+        std::make_tuple("foobar", 838383),
+        std::make_tuple("foo", true),
+        std::make_tuple("bar", false),
     };
 
     for (size_t i = 0; i < tests.size(); ++i) {
@@ -63,6 +67,9 @@ TEST(Parser, TestLetStatment) {
         ASSERT_TRUE(let_stmt != nullptr);
         EXPECT_EQ(std::get<0>(test), let_stmt->identifier()->token_literal());
         EXPECT_EQ(std::get<0>(test), let_stmt->identifier()->value());
+
+        auto exp = let_stmt->expression();
+        test_literal(std::get<1>(test), exp);
     }
 }
 
@@ -91,6 +98,8 @@ TEST(Parser, TestReturnStatment) {
         return 5;
         return 10;
         return 938383;
+        return true;
+        return false;
     )";
 
     Parser parser;
@@ -102,13 +111,25 @@ TEST(Parser, TestReturnStatment) {
     auto& errors = parser.errors();
 
     EXPECT_TRUE(errors.empty());
-    ASSERT_EQ(3u, statments.size());
+    ASSERT_EQ(5u, statments.size());
 
+    std::vector<std::any> tests = {
+        5,
+        10,
+        938383,
+        true,
+        false,
+    };
 
-    for (auto& stmt : statments) {
+    ASSERT_EQ(5u, statments.size());
+
+    for (size_t i = 0; i < tests.size(); ++i) {
+        auto& expect = tests[i];
+        auto& stmt = statments[i];
         EXPECT_STREQ("return", stmt->token_literal().c_str());
         auto return_stmt = stmt->cast<ReturnStatment>();
         EXPECT_TRUE(return_stmt != nullptr);
+        test_literal(expect, return_stmt->expression());
     }
 }
 
