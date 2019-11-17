@@ -25,6 +25,7 @@ Parser::Parser() {
     _prefix_parse_funcs[Token::INT] = std::bind(&Parser::parse_integer_literal, this);
     _prefix_parse_funcs[Token::TRUE] = std::bind(&Parser::parse_boolean_literal, this);
     _prefix_parse_funcs[Token::FALSE] = std::bind(&Parser::parse_boolean_literal, this);
+    _prefix_parse_funcs[Token::FUNCTION] = std::bind(&Parser::parse_function_literal, this);
     _prefix_parse_funcs[Token::LPAREN] = std::bind(&Parser::parse_group_expression, this);
     _prefix_parse_funcs[Token::BANG] = std::bind(&Parser::parse_prefix_expression, this);
     _prefix_parse_funcs[Token::MINUS] = std::bind(&Parser::parse_prefix_expression, this);
@@ -231,6 +232,48 @@ std::unique_ptr<ast::Expression> Parser::parse_integer_literal() {
 
 std::unique_ptr<ast::Expression> Parser::parse_boolean_literal() {
     return std::unique_ptr<ast::Expression>(new ast::BooleanLiteral(_current_token));
+}
+
+std::vector<std::unique_ptr<ast::Identifier>> Parser::parse_function_parameters() {
+    std::vector<std::unique_ptr<ast::Identifier>> idents;
+    if (peek_token_is(Token::RPAREN)) {
+        next_token();
+        return idents;
+    }
+
+    next_token();
+    idents.emplace_back(new ast::Identifier(_current_token, _current_token.literal));
+
+    while (peek_token_is(Token::COMMA)) {
+        next_token(); // comma
+        next_token(); // param
+        idents.emplace_back(new ast::Identifier(_current_token, _current_token.literal));
+    }
+
+    if (!expect_peek(Token::RPAREN)) {
+        return {};
+    }
+
+    return idents;
+}
+
+std::unique_ptr<ast::Expression> Parser::parse_function_literal() {
+    std::unique_ptr<ast::FunctionLiteral> function_literal(new ast::FunctionLiteral(_current_token));
+
+    if (!expect_peek(Token::LPAREN)) {
+        return nullptr;
+    }
+
+    auto params = parse_function_parameters();
+    function_literal->set_parameters(std::move(params));
+
+    if (!expect_peek(Token::LBRACE)) {
+        return nullptr;
+    }
+
+    auto body = parse_block_statment();
+    function_literal->set_body(body.release());
+    return function_literal;
 }
 
 std::unique_ptr<ast::Expression> Parser::parse_group_expression() {
