@@ -228,7 +228,6 @@ std::unique_ptr<ast::Expression> Parser::parse_group_expression() {
     next_token();
     auto exp = parse_expression(Precedence::LOWEST);
     if (!expect_peek(Token::RPAREN)) {
-        _errors.push_back("expect `)` token, got `" + _current_token.literal + "` instead.");
         return nullptr;
     }
     return exp;
@@ -249,7 +248,6 @@ std::unique_ptr<ast::Expression> Parser::parse_if_expression() {
             new ast::IfExpression(_current_token));
 
     if (!expect_peek(Token::LPAREN)) {
-        _errors.push_back("expect token `(`, got `" + _current_token.literal + "` instead.");
         return nullptr;
     }
 
@@ -259,12 +257,10 @@ std::unique_ptr<ast::Expression> Parser::parse_if_expression() {
     if_expression->set_condition(exp.release());
 
     if (!expect_peek(Token::RPAREN)) {
-        _errors.push_back("expect token `)`, got `" + _current_token.literal + "` instead.");
         return nullptr;
     }
 
     if (!expect_peek(Token::LBRACE)) {
-        _errors.push_back("expect token `{`, got `" + _current_token.literal + "` instead.");
         return nullptr;
     }
 
@@ -275,7 +271,6 @@ std::unique_ptr<ast::Expression> Parser::parse_if_expression() {
     if (peek_token_is(Token::ELSE)) {
         next_token();
         if (!expect_peek(Token::LBRACE)) {
-            _errors.push_back("expect token `{`, got `" + _current_token.literal + "` instead.");
             return nullptr;
         }
         auto alternative = parse_block_statment();

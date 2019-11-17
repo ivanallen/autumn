@@ -308,6 +308,44 @@ TEST(parser, TestBooleanLiteralExpression) {
 }
 
 TEST(Parser, TestIfExpression) {
+    std::string input = "if (x < y) { x }";
+
+    Parser parser;
+    auto program = parser.parse(input);
+    for (auto& error : parser.errors()) {
+        std::cout << error << std::endl;
+    }
+
+    ASSERT_TRUE(program != nullptr);
+    auto& statments = program->statments();
+    ASSERT_EQ(1u, statments.size());
+    auto stmt = statments[0]->cast<ExpressionStatment>();
+    ASSERT_TRUE(stmt != nullptr);
+    auto exp = stmt->expression();
+    ASSERT_TRUE(exp != nullptr);
+    auto if_exp = exp->cast<IfExpression>();
+    ASSERT_TRUE(if_exp != nullptr);
+    auto condition_exp = if_exp->condition();
+    ASSERT_TRUE(condition_exp != nullptr);
+    auto infix_exp = condition_exp->cast<InfixExpression>();
+    ASSERT_TRUE(infix_exp != nullptr);
+
+    test_literal(std::string("x"), infix_exp->left());
+    test_literal(std::string("y"), infix_exp->right());
+
+    auto consequence = if_exp->consequence();
+    ASSERT_TRUE(consequence != nullptr);
+
+    auto& consequence_statments = consequence->statments();
+    ASSERT_EQ(1u, consequence_statments.size());
+    stmt = consequence_statments[0]->cast<ExpressionStatment>();
+    test_literal(std::string("x"), stmt->expression());
+
+    auto alternative = if_exp->alternative();
+    ASSERT_TRUE(alternative == nullptr);
+}
+
+TEST(Parser, TestIfElseExpression) {
     std::string input = "if (x < y) { x } else { y }";
 
     Parser parser;
