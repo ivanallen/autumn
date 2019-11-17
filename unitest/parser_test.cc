@@ -254,8 +254,13 @@ TEST(Parser, TestOperatorPrecedenceParsing) {
         {"3 + 4 * 5 == 3 * 1 + 4 * 5", "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"},
         {"true", "true"},
         {"false", "false"},
-        {" 3 > 5 == false", "((3 > 5) == false)"},
-        {" 3 < 5 == true", "((3 < 5) == true)"},
+        {"3 > 5 == false", "((3 > 5) == false)"},
+        {"3 < 5 == true", "((3 < 5) == true)"},
+        {"1 + (2 + 3) + 4", "((1 + (2 + 3)) + 4)"},
+        {"(5 + 5) * 2", "((5 + 5) * 2)"},
+        {"2 / (5 + 5)", "(2 / (5 + 5))"},
+        {"-(5 + 5)", "(-(5 + 5))"},
+        {"!(true == true)", "(!(true == true))"},
     };
 
     Parser parser;
@@ -266,6 +271,10 @@ TEST(Parser, TestOperatorPrecedenceParsing) {
 
         auto program = parser.parse(input);
         ASSERT_TRUE(program != nullptr);
+        auto& errors = parser.errors();
+        for (auto& error : errors) {
+            std::cout << error << std::endl;
+        }
         EXPECT_EQ(expect, program->to_string());
     }
 }
