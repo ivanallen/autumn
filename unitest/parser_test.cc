@@ -15,16 +15,22 @@ namespace {
 
 // 工具函数
 void test_literal(const std::any& expect, const Expression* exp) {
+    ASSERT_TRUE(exp != nullptr);
     if (expect.type() == typeid(int)) {
-        ASSERT_TRUE(exp != nullptr);
         auto int_literal = exp->cast<IntegerLiteral>();
         ASSERT_TRUE(int_literal != nullptr);
         EXPECT_EQ(std::any_cast<int>(expect), int_literal->value());
     } else if (expect.type() == typeid(bool)) {
-        ASSERT_TRUE(exp != nullptr);
         auto bool_literal = exp->cast<BooleanLiteral>();
         ASSERT_TRUE(bool_literal != nullptr);
         EXPECT_EQ(std::any_cast<bool>(expect), bool_literal->value());
+    } else if (expect.type() == typeid(std::string)) {
+        auto ident = exp->cast<Identifier>();
+        ASSERT_TRUE(ident != nullptr);
+        EXPECT_EQ(std::any_cast<std::string>(expect), ident->token_literal().c_str());
+        EXPECT_EQ(std::any_cast<std::string>(expect), ident->value());
+    } else {
+        ASSERT_TRUE(false);
     }
 }
 
@@ -130,9 +136,7 @@ TEST(Parser, TestIdentifierExpression) {
     auto exp = stmt->expression();
     ASSERT_TRUE(exp != nullptr);
     auto ident = exp->cast<Identifier>();
-    ASSERT_TRUE(ident != nullptr);
-    EXPECT_STREQ("foobar", ident->token_literal().c_str());
-    EXPECT_STREQ("foobar", ident->value().c_str());
+    test_literal(std::string("foobar"), ident);
 }
 
 TEST(Parser, TestIntegerLiteralExpression) {
