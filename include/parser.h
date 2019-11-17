@@ -41,6 +41,7 @@ private:
     std::unique_ptr<ast::Statment> parse_let_statment();
     std::unique_ptr<ast::Statment> parse_return_statment();
     std::unique_ptr<ast::Statment> parse_expression_statment();
+    std::unique_ptr<ast::BlockStatment> parse_block_statment();
 
     std::unique_ptr<ast::Expression> parse_expression(Precedence precedence);
 private:
@@ -50,6 +51,7 @@ private:
     std::unique_ptr<ast::Expression> parse_boolean_literal();
     std::unique_ptr<ast::Expression> parse_group_expression();
     std::unique_ptr<ast::Expression> parse_prefix_expression();
+    std::unique_ptr<ast::Expression> parse_if_expression();
     std::unique_ptr<ast::Expression> parse_infix_expression(ast::Expression* left);
 private:
     using PrefixParseFunc = std::function<std::unique_ptr<ast::Expression>()>;

@@ -28,6 +28,7 @@ Parser::Parser() {
     _prefix_parse_funcs[Token::LPAREN] = std::bind(&Parser::parse_group_expression, this);
     _prefix_parse_funcs[Token::BANG] = std::bind(&Parser::parse_prefix_expression, this);
     _prefix_parse_funcs[Token::MINUS] = std::bind(&Parser::parse_prefix_expression, this);
+    _prefix_parse_funcs[Token::IF] = std::bind(&Parser::parse_if_expression, this);
 
     // 注册中缀解析函数
     _infix_parse_funcs[Token::PLUS] = std::bind(&Parser::parse_infix_expression, this, _1);
@@ -236,10 +237,68 @@ std::unique_ptr<ast::Expression> Parser::parse_group_expression() {
 std::unique_ptr<ast::Expression> Parser::parse_prefix_expression() {
     std::unique_ptr<ast::PrefixExpression> prefix_expression(
             new ast::PrefixExpression(_current_token));
+
     next_token();
     auto right = parse_expression(Precedence::PREFIX);
     prefix_expression->set_right(right.release());
     return prefix_expression;
+}
+
+std::unique_ptr<ast::Expression> Parser::parse_if_expression() {
+    std::unique_ptr<ast::IfExpression> if_expression(
+            new ast::IfExpression(_current_token));
+
+    if (!expect_peek(Token::LPAREN)) {
+        _errors.push_back("expect token `(`, got `" + _current_token.literal + "` instead.");
+        return nullptr;
+    }
+
+    next_token();
+
+    auto exp = parse_expression(Precedence::LOWEST);
+    if_expression->set_condition(exp.release());
+
+    if (!expect_peek(Token::RPAREN)) {
+        _errors.push_back("expect token `)`, got `" + _current_token.literal + "` instead.");
+        return nullptr;
+    }
+
+    if (!expect_peek(Token::LBRACE)) {
+        _errors.push_back("expect token `{`, got `" + _current_token.literal + "` instead.");
+        return nullptr;
+    }
+
+    auto consequence = parse_block_statment();
+    if_expression->set_consequence(consequence.release());
+
+    // 如果有 alternative，继续解析
+    if (peek_token_is(Token::ELSE)) {
+        next_token();
+        if (!expect_peek(Token::LBRACE)) {
+            _errors.push_back("expect token `{`, got `" + _current_token.literal + "` instead.");
+            return nullptr;
+        }
+        auto alternative = parse_block_statment();
+        if_expression->set_alternative(alternative.release());
+    }
+
+    return if_expression;
+}
+
+std::unique_ptr<ast::BlockStatment> Parser::parse_block_statment() {
+    std::unique_ptr<ast::BlockStatment> block_statment(
+            new ast::BlockStatment(_current_token));
+
+    next_token();
+
+    while (!current_token_is(Token::RBRACE)) {
+        auto stat = parse_statment();
+        if (stat != nullptr) {
+            block_statment->append(stat.release());
+        }
+        next_token();
+    }
+    return block_statment;
 }
 
 std::unique_ptr<ast::Expression> Parser::parse_infix_expression(ast::Expression* left) {

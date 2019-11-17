@@ -185,6 +185,82 @@ private:
     std::unique_ptr<Expression> _right;
 };
 
+class BlockStatment : public Statment {
+public:
+    friend class autumn::Parser;
+    using Statment::Statment;
+    const std::vector<std::unique_ptr<Statment>>& statments() const {
+        return _statments;
+    }
+
+    std::string to_string() const override{
+        std::string ret;
+        for (auto& stmt : _statments) {
+            ret += stmt->to_string();
+        }
+        return ret;
+    }
+
+private:
+    void append(Statment* statment) {
+        _statments.emplace_back(statment);
+    }
+private:
+    std::vector<std::unique_ptr<Statment>> _statments;
+};
+
+class IfExpression : public Expression {
+public:
+    friend class autumn::Parser;
+    using Expression::Expression;
+
+    const Expression* condition() const {
+        return _condition.get();
+    }
+
+    const BlockStatment* consequence() const {
+        return _consequence.get();
+    }
+
+    const BlockStatment* alternative() const {
+        return _alternative.get();
+    }
+
+    std::string to_string() const override{
+        if (_condition == nullptr || _consequence == nullptr) {
+            return std::string();
+        }
+
+        std::string ret = "if ("
+                + _condition->to_string()
+                + ") {"
+                + _consequence->to_string()
+                + "}";
+        if (_alternative != nullptr) {
+            ret += " else {"
+                    + _alternative->to_string()
+                    + "}";
+        }
+        return ret;
+    }
+private:
+    void set_condition(Expression* condition) {
+        _condition.reset(condition);
+    }
+
+    void set_consequence(BlockStatment* consequence) {
+        _consequence.reset(consequence);
+    }
+
+    void set_alternative(BlockStatment* alternative) {
+        _alternative.reset(alternative);
+    }
+private:
+    std::unique_ptr<Expression> _condition;
+    std::unique_ptr<BlockStatment> _consequence;
+    std::unique_ptr<BlockStatment> _alternative;
+};
+
 class LetStatment : public Statment {
 public:
     friend class autumn::Parser;
