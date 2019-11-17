@@ -1,3 +1,4 @@
+#include <any>
 #include <string>
 #include <tuple>
 #include <gtest/gtest.h>
@@ -11,6 +12,21 @@ using namespace autumn;
 using namespace autumn::ast;
 
 namespace {
+
+// 工具函数
+void test_literal(const std::any& expect, const Expression* exp) {
+    if (expect.type() == typeid(int)) {
+        ASSERT_TRUE(exp != nullptr);
+        auto int_literal = exp->cast<IntegerLiteral>();
+        ASSERT_TRUE(int_literal != nullptr);
+        EXPECT_EQ(std::any_cast<int>(expect), int_literal->value());
+    } else if (expect.type() == typeid(bool)) {
+        ASSERT_TRUE(exp != nullptr);
+        auto bool_literal = exp->cast<BooleanLiteral>();
+        ASSERT_TRUE(bool_literal != nullptr);
+        EXPECT_EQ(std::any_cast<bool>(expect), bool_literal->value());
+    }
+}
 
 TEST(Parser, TestLetStatment) {
     std::string input = R"(
@@ -140,9 +156,11 @@ TEST(Parser, TestIntegerLiteralExpression) {
 }
 
 TEST(Parser, TestParsingPrefixExpression) {
-    std::vector<std::tuple<std::string, std::string, int>> tests = {
+    std::vector<std::tuple<std::string, std::string, std::any>> tests = {
         {"!5;", "!", 5},
         {"-15;", "-", 15},
+        {"!true;", "!", true},
+        {"!false;", "!", false},
     };
 
     Parser parser;
@@ -150,7 +168,7 @@ TEST(Parser, TestParsingPrefixExpression) {
     for (auto& test : tests) {
         auto& input = std::get<0>(test);
         auto& op = std::get<1>(test);
-        auto val = std::get<2>(test);
+        auto& expect = std::get<2>(test);
 
         auto program = parser.parse(input);
         auto& errors = parser.errors();
@@ -168,15 +186,13 @@ TEST(Parser, TestParsingPrefixExpression) {
         ASSERT_TRUE(prefix_exp != nullptr);
         EXPECT_EQ(op, prefix_exp->op());
         auto right = prefix_exp->right();
-        ASSERT_TRUE(right != nullptr);
-        auto int_literal = right->cast<IntegerLiteral>();
-        ASSERT_TRUE(int_literal != nullptr);
-        EXPECT_EQ(val, int_literal->value());
+
+        test_literal(expect, right);
     }
 }
 
 TEST(Parser, TestParsingInfixExpression) {
-    std::vector<std::tuple<std::string, int, std::string, int>> tests = {
+    std::vector<std::tuple<std::string, std::any, std::string, std::any>> tests = {
         {"5 + 5;", 5, "+", 5},
         {"5 - 5;", 5, "-", 5},
         {"5 * 5;", 5, "*", 5},
@@ -185,15 +201,18 @@ TEST(Parser, TestParsingInfixExpression) {
         {"5 < 5;", 5, "<", 5},
         {"5 == 5;", 5, "==", 5},
         {"5 != 5;", 5, "!=", 5},
+        {"true == true;", true, "==", true},
+        {"false == false;", false, "==", false},
+        {"true != false;", true, "!=", false},
     };
 
     Parser parser;
 
     for (auto& test : tests) {
         auto& input = std::get<0>(test);
-        auto left_val = std::get<1>(test);
+        auto& left_expect = std::get<1>(test);
         auto& op = std::get<2>(test);
-        auto right_val = std::get<3>(test);
+        auto& right_expect = std::get<3>(test);
 
         auto program = parser.parse(input);
         auto& errors = parser.errors();
@@ -214,15 +233,8 @@ TEST(Parser, TestParsingInfixExpression) {
         auto left_exp = infix_exp->left();
         auto right_exp = infix_exp->right();
 
-        ASSERT_TRUE(left_exp != nullptr);
-        auto left_int_literal = left_exp->cast<IntegerLiteral>();
-        ASSERT_TRUE(left_int_literal != nullptr);
-        EXPECT_EQ(left_val, left_int_literal->value());
-
-        ASSERT_TRUE(right_exp != nullptr);
-        auto right_int_literal = right_exp->cast<IntegerLiteral>();
-        ASSERT_TRUE(right_int_literal != nullptr);
-        EXPECT_EQ(right_val, right_int_literal->value());
+        test_literal(left_expect, left_exp);
+        test_literal(right_expect, right_exp);
     }
 }
 
@@ -240,6 +252,10 @@ TEST(Parser, TestOperatorPrecedenceParsing) {
         {"5 < 4 != 3 > 4", "((5 < 4) != (3 > 4))"},
         {"3 + 4 * 5 == 3 * 1 + 4 * 5", "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"},
         {"3 + 4 * 5 == 3 * 1 + 4 * 5", "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"},
+        {"true", "true"},
+        {"false", "false"},
+        {" 3 > 5 == false", "((3 > 5) == false)"},
+        {" 3 < 5 == true", "((3 < 5) == true)"},
     };
 
     Parser parser;
@@ -274,10 +290,7 @@ TEST(parser, TestBooleanLiteralExpression) {
         ASSERT_TRUE(stat != nullptr);
         auto exp = stat->expression();
 
-        ASSERT_TRUE(exp != nullptr);
-        auto bool_literal = exp->cast<BooleanLiteral>();
-        ASSERT_TRUE(bool_literal != nullptr);
-        EXPECT_EQ(expect, bool_literal->value());
+        test_literal(expect, exp);
     }
 }
 
