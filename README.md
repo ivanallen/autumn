@@ -9,7 +9,7 @@ An easy interpreter to learn.
 - Modern C++ style(Based on C++17)
 - Full comments
 
-## How to build?
+## Quick Start
 
 ### Install GCC8
 
@@ -23,7 +23,11 @@ $ scl enable devtoolset-8 bash
 - Ubuntu
 
 ```
-{{Please complete me}}
+$ sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+$ sudo apt-get update -qq
+$ sudo apt-get install -qq g++-8
+$ export CXX="g++-8"
+$ export CC="gcc-8"
 ```
 
 ### Build & Test
@@ -32,6 +36,18 @@ $ scl enable devtoolset-8 bash
 $ make
 ```
 
+## Contributor
+
+Allen.
+
+## License
+
+This project maintained under BSD 2.
+
 ## Contact
 
 QQ Group: 610441700
+
+## References
+
+- [Write An Interpreter In Go](https://interpreterbook.com)
