@@ -25,6 +25,7 @@ Parser::Parser() {
     _prefix_parse_funcs[Token::INT] = std::bind(&Parser::parse_integer_literal, this);
     _prefix_parse_funcs[Token::TRUE] = std::bind(&Parser::parse_boolean_literal, this);
     _prefix_parse_funcs[Token::FALSE] = std::bind(&Parser::parse_boolean_literal, this);
+    _prefix_parse_funcs[Token::LPAREN] = std::bind(&Parser::parse_group_expression, this);
     _prefix_parse_funcs[Token::BANG] = std::bind(&Parser::parse_prefix_expression, this);
     _prefix_parse_funcs[Token::MINUS] = std::bind(&Parser::parse_prefix_expression, this);
 
@@ -220,6 +221,16 @@ std::unique_ptr<ast::Expression> Parser::parse_integer_literal() {
 
 std::unique_ptr<ast::Expression> Parser::parse_boolean_literal() {
     return std::unique_ptr<ast::Expression>(new ast::BooleanLiteral(_current_token));
+}
+
+std::unique_ptr<ast::Expression> Parser::parse_group_expression() {
+    next_token();
+    auto exp = parse_expression(Precedence::LOWEST);
+    if (!expect_peek(Token::RPAREN)) {
+        _errors.push_back("expect `)` token, got `" + _current_token.literal + "` instead.");
+        return nullptr;
+    }
+    return exp;
 }
 
 std::unique_ptr<ast::Expression> Parser::parse_prefix_expression() {
