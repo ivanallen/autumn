@@ -261,6 +261,55 @@ private:
     std::unique_ptr<BlockStatment> _alternative;
 };
 
+class FunctionLiteral : public Expression {
+public:
+    friend class autumn::Parser;
+    using Expression::Expression;
+
+    const std::vector<std::unique_ptr<Identifier>>& parameters() const {
+        return _parameters;
+    }
+
+    const BlockStatment* body() const {
+        return _body.get();
+    }
+
+    std::string to_string() const override {
+        if (_body == nullptr) {
+            return std::string();
+        }
+
+        std::string ret(_token.literal);
+
+        ret.append(1, '(');
+        for (size_t i = 0; i < _parameters.size(); ++i) {
+            if (i != 0) {
+                ret.append(", ");
+            }
+            ret.append(_parameters[i]->to_string());
+        }
+        ret.append(") {");
+        ret.append(_body->to_string());
+        ret.append("}");
+        return ret;
+    }
+private:
+    void append_parameter(Identifier* parameter) {
+        _parameters.emplace_back(parameter);
+    }
+
+    void set_parameters(std::vector<std::unique_ptr<Identifier>>&& parameters) {
+        _parameters = std::move(parameters);
+    }
+
+    void set_body(BlockStatment* body) {
+        _body.reset(body);
+    }
+private:
+    std::vector<std::unique_ptr<Identifier>> _parameters;
+    std::unique_ptr<BlockStatment> _body;
+};
+
 class LetStatment : public Statment {
 public:
     friend class autumn::Parser;

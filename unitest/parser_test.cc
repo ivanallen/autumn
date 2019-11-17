@@ -27,11 +27,28 @@ void test_literal(const std::any& expect, const Expression* exp) {
     } else if (expect.type() == typeid(std::string)) {
         auto ident = exp->cast<Identifier>();
         ASSERT_TRUE(ident != nullptr);
-        EXPECT_EQ(std::any_cast<std::string>(expect), ident->token_literal().c_str());
+        EXPECT_EQ(std::any_cast<std::string>(expect), ident->token_literal());
         EXPECT_EQ(std::any_cast<std::string>(expect), ident->value());
+    } else if (expect.type() == typeid(const char*)) {
+        auto ident = exp->cast<Identifier>();
+        ASSERT_TRUE(ident != nullptr);
+        EXPECT_STREQ(std::any_cast<const char*>(expect), ident->token_literal().c_str());
+        EXPECT_STREQ(std::any_cast<const char*>(expect), ident->value().c_str());
     } else {
         ASSERT_TRUE(false);
     }
+}
+
+void test_infix_expression(
+        const std::any& left_expect,
+        const std::string& op_expect,
+        const std::any& right_expect,
+        const Expression* exp) {
+    ASSERT_TRUE(exp != nullptr);
+    auto infix_exp = exp->cast<InfixExpression>();
+    ASSERT_TRUE(infix_exp != nullptr);
+    test_literal(left_expect, infix_exp->left());
+    test_literal(right_expect, infix_exp->right());
 }
 
 TEST(Parser, TestLetStatment) {
@@ -250,16 +267,8 @@ TEST(Parser, TestParsingInfixExpression) {
         auto stmt = statments[0]->cast<ExpressionStatment>();
         ASSERT_TRUE(stmt != nullptr);
         auto exp = stmt->expression();
-        ASSERT_TRUE(exp != nullptr);
-        auto infix_exp = exp->cast<InfixExpression>();
-        ASSERT_TRUE(infix_exp != nullptr);
-        EXPECT_EQ(op, infix_exp->op());
 
-        auto left_exp = infix_exp->left();
-        auto right_exp = infix_exp->right();
-
-        test_literal(left_expect, left_exp);
-        test_literal(right_expect, right_exp);
+        test_infix_expression(left_expect, op, right_expect, exp);
     }
 }
 
@@ -347,12 +356,7 @@ TEST(Parser, TestIfExpression) {
     auto if_exp = exp->cast<IfExpression>();
     ASSERT_TRUE(if_exp != nullptr);
     auto condition_exp = if_exp->condition();
-    ASSERT_TRUE(condition_exp != nullptr);
-    auto infix_exp = condition_exp->cast<InfixExpression>();
-    ASSERT_TRUE(infix_exp != nullptr);
-
-    test_literal(std::string("x"), infix_exp->left());
-    test_literal(std::string("y"), infix_exp->right());
+    test_infix_expression("x", "<", "y", condition_exp);
 
     auto consequence = if_exp->consequence();
     ASSERT_TRUE(consequence != nullptr);
@@ -385,12 +389,7 @@ TEST(Parser, TestIfElseExpression) {
     auto if_exp = exp->cast<IfExpression>();
     ASSERT_TRUE(if_exp != nullptr);
     auto condition_exp = if_exp->condition();
-    ASSERT_TRUE(condition_exp != nullptr);
-    auto infix_exp = condition_exp->cast<InfixExpression>();
-    ASSERT_TRUE(infix_exp != nullptr);
-
-    test_literal(std::string("x"), infix_exp->left());
-    test_literal(std::string("y"), infix_exp->right());
+    test_infix_expression("x", "<", "y", condition_exp);
 
     auto consequence = if_exp->consequence();
     ASSERT_TRUE(consequence != nullptr);
@@ -406,6 +405,39 @@ TEST(Parser, TestIfElseExpression) {
     ASSERT_EQ(1u, alternative_statments.size());
     stmt = alternative_statments[0]->cast<ExpressionStatment>();
     test_literal(std::string("y"), stmt->expression());
+}
+
+TEST(Parser, TestFunctionLiteralParsing) {
+    std::string input = "fn(x, y) { x + y; }";
+
+    Parser parser;
+    auto program = parser.parse(input);
+    for (auto& error : parser.errors()) {
+        std::cout << error << std::endl;
+    }
+
+    ASSERT_TRUE(program != nullptr);
+    auto& statments = program->statments();
+    ASSERT_EQ(1u, statments.size());
+    auto stmt = statments[0]->cast<ExpressionStatment>();
+    ASSERT_TRUE(stmt != nullptr);
+    auto exp = stmt->expression();
+    ASSERT_TRUE(exp != nullptr);
+
+    auto fn_literal = exp->cast<FunctionLiteral>();
+    ASSERT_TRUE(fn_literal != nullptr);
+    auto& params = fn_literal->parameters();
+    ASSERT_EQ(2u, params.size());
+    test_literal("x", params[0].get());
+    test_literal("y", params[1].get());
+
+    auto body = fn_literal->body();
+    auto& body_stats = body->statments();
+    ASSERT_EQ(1u, body_stats.size());
+    stmt = body_stats[0]->cast<ExpressionStatment>();
+    ASSERT_TRUE(stmt != nullptr);
+    exp = stmt->expression();
+    test_infix_expression("x", "+", "y", exp);
 }
 
 }

@@ -42,6 +42,7 @@ private:
     std::unique_ptr<ast::Statment> parse_return_statment();
     std::unique_ptr<ast::Statment> parse_expression_statment();
     std::unique_ptr<ast::BlockStatment> parse_block_statment();
+    std::vector<std::unique_ptr<ast::Identifier>> parse_function_parameters();
 
     std::unique_ptr<ast::Expression> parse_expression(Precedence precedence);
 private:
@@ -49,6 +50,7 @@ private:
     std::unique_ptr<ast::Expression> parse_identifier();
     std::unique_ptr<ast::Expression> parse_integer_literal();
     std::unique_ptr<ast::Expression> parse_boolean_literal();
+    std::unique_ptr<ast::Expression> parse_function_literal();
     std::unique_ptr<ast::Expression> parse_group_expression();
     std::unique_ptr<ast::Expression> parse_prefix_expression();
     std::unique_ptr<ast::Expression> parse_if_expression();
