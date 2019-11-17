@@ -150,8 +150,13 @@ std::unique_ptr<ast::Statment> Parser::parse_let_statment() {
         return nullptr;
     }
 
-    // 表达式解析部分，暂时跳过
-    while (!current_token_is(Token::SEMICOLON)) {
+    // 跳过 = 号
+    next_token();
+    // 表达式解析部分
+    auto exp = parse_expression(Precedence::LOWEST);
+    stmt->set_expression(exp.release());
+
+    if (peek_token_is(Token::SEMICOLON)) {
         next_token();
     }
 
@@ -161,8 +166,12 @@ std::unique_ptr<ast::Statment> Parser::parse_let_statment() {
 std::unique_ptr<ast::Statment> Parser::parse_return_statment() {
     std::unique_ptr<ast::ReturnStatment> stmt(new ast::ReturnStatment(_current_token));
 
-    // 表达式解析部分，暂时跳过
-    while (!current_token_is(Token::SEMICOLON)) {
+    next_token();
+    // 表达式解析部分
+    auto exp = parse_expression(Precedence::LOWEST);
+    stmt->set_expression(exp.release());
+
+    if (peek_token_is(Token::SEMICOLON)) {
         next_token();
     }
 
