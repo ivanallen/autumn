@@ -1,5 +1,5 @@
 CXXFLAGS=-g -std=c++17 -Werror -I../googletest/include -I../include
-LDFLAGS=-L../googletest/lib64 -L../lib -lgtest_main -lgtest -lpthread -lautumn
+LDFLAGS=-L../googletest/lib -L../lib -lgtest -lpthread -lautumn
 
 DEPS=../lib/libautumn.a
 
