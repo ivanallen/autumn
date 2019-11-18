@@ -43,6 +43,7 @@ private:
     std::unique_ptr<ast::Statment> parse_expression_statment();
     std::unique_ptr<ast::BlockStatment> parse_block_statment();
     std::vector<std::unique_ptr<ast::Identifier>> parse_function_parameters();
+    std::vector<std::unique_ptr<ast::Expression>> parse_call_arguments();
 
     std::unique_ptr<ast::Expression> parse_expression(Precedence precedence);
 private:
@@ -55,6 +56,7 @@ private:
     std::unique_ptr<ast::Expression> parse_prefix_expression();
     std::unique_ptr<ast::Expression> parse_if_expression();
     std::unique_ptr<ast::Expression> parse_infix_expression(ast::Expression* left);
+    std::unique_ptr<ast::Expression> parse_call_expression(ast::Expression* left);
 private:
     using PrefixParseFunc = std::function<std::unique_ptr<ast::Expression>()>;
     using InfixParseFunc = std::function<std::unique_ptr<ast::Expression>(ast::Expression* expression)>;

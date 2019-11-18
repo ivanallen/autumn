@@ -14,6 +14,7 @@ const std::unordered_map<Token::Type, Parser::Precedence> PRECEDENCES = {
     {Token::MINUS, Parser::Precedence::SUM},
     {Token::SLASH, Parser::Precedence::PRODUCT},
     {Token::ASTERISK, Parser::Precedence::PRODUCT},
+    {Token::LPAREN, Parser::Precedence::CALL},
 };
 
 }
@@ -40,6 +41,8 @@ Parser::Parser() {
     _infix_parse_funcs[Token::NEQ] = std::bind(&Parser::parse_infix_expression, this, _1);
     _infix_parse_funcs[Token::LT] = std::bind(&Parser::parse_infix_expression, this, _1);
     _infix_parse_funcs[Token::GT] = std::bind(&Parser::parse_infix_expression, this, _1);
+    // 在 call 表达式中，形如 add(1, 2 * 3)，我们把 ( 看作是中缀操作符，且它有最高的优先级
+    _infix_parse_funcs[Token::LPAREN] = std::bind(&Parser::parse_call_expression, this, _1);
 }
 
 const std::vector<std::string>& Parser::errors() const {
@@ -366,6 +369,40 @@ std::unique_ptr<ast::Expression> Parser::parse_infix_expression(ast::Expression*
     infix_expression->set_right(right.release());
 
     return infix_expression;
+}
+
+std::unique_ptr<ast::Expression> Parser::parse_call_expression(ast::Expression* left) {
+    std::unique_ptr<ast::CallExpression> call_expression(
+            new ast::CallExpression(_current_token));
+
+    auto args = parse_call_arguments();
+    call_expression->set_arguments(std::move(args)); 
+    call_expression->set_function(left);
+
+    return call_expression;
+}
+
+std::vector<std::unique_ptr<ast::Expression>> Parser::parse_call_arguments() {
+    std::vector<std::unique_ptr<ast::Expression>> args;
+
+    if (peek_token_is(Token::RPAREN)) {
+        next_token();
+        return {};
+    }
+
+    next_token();
+    args.emplace_back(parse_expression(Precedence::LOWEST));
+
+    while (peek_token_is(Token::COMMA)) {
+        next_token();
+        next_token();
+        args.emplace_back(parse_expression(Precedence::LOWEST));
+    }
+
+    if (!expect_peek(Token::RPAREN)) {
+        return {};
+    }
+    return args;
 }
 
 } // namespace autumn

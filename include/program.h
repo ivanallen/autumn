@@ -310,6 +310,50 @@ private:
     std::unique_ptr<BlockStatment> _body;
 };
 
+class CallExpression : public Expression {
+public:
+    friend class autumn::Parser;
+    using Expression::Expression;
+    
+    const Expression* function() const {
+        return _function.get();
+    }
+
+    const std::vector<std::unique_ptr<Expression>>& arguments() const {
+        return _arguments;
+    }
+
+    std::string to_string() const override {
+        std::string ret;
+        if (_function == nullptr) {
+            return ret;
+        }
+
+        ret += _function->to_string();
+        ret.append(1, '(');
+        for (size_t i = 0; i < _arguments.size(); ++i) {
+            if (i != 0) {
+                ret.append(", ");
+            }
+            ret.append(_arguments[i]->to_string());
+        }
+        ret.append(1, ')');
+        return ret;
+    }
+private:
+    void set_function(Expression* fn) {
+        _function.reset(fn);
+    }
+
+    void set_arguments(std::vector<std::unique_ptr<Expression>>&& args) {
+        _arguments = std::move(args);
+    }
+private:
+    // FunctionLiteral or Identifier
+    std::unique_ptr<Expression> _function;
+    std::vector<std::unique_ptr<Expression>> _arguments;
+};
+
 class LetStatment : public Statment {
 public:
     friend class autumn::Parser;

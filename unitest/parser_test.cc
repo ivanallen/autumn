@@ -295,6 +295,9 @@ TEST(Parser, TestOperatorPrecedenceParsing) {
         {"2 / (5 + 5)", "(2 / (5 + 5))"},
         {"-(5 + 5)", "(-(5 + 5))"},
         {"!(true == true)", "(!(true == true))"},
+        {"a + add(b * c) + d", "((a + add((b * c))) + d)"},
+        {"add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))", "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))"},
+        {"add(a + b + c * d / f + g)", "add((((a + b) + ((c * d) / f)) + g))"},
     };
 
     Parser parser;
@@ -476,6 +479,35 @@ TEST(Parser, TestFunctionParameterParsing) {
             test_literal(expect_param, params[i].get());
         }
     }
+}
+
+TEST(Parser, TestCallExpressionParsing) {
+    std::string input = "add(1, 2 * 3, 4 + 5)";
+
+    Parser parser;
+    auto program = parser.parse(input);
+    for (auto& error : parser.errors()) {
+        std::cout << error << std::endl;
+    }
+    ASSERT_TRUE(program != nullptr);
+
+    auto& statments = program->statments();
+    ASSERT_EQ(1u, statments.size());
+    auto stmt = statments[0]->cast<ExpressionStatment>();
+    ASSERT_TRUE(stmt != nullptr);
+    auto exp = stmt->expression();
+    ASSERT_TRUE(exp != nullptr);
+    auto call_exp = exp->cast<CallExpression>();
+    ASSERT_TRUE(call_exp != nullptr);
+    auto fn_exp = call_exp->function();
+    ASSERT_TRUE(fn_exp != nullptr);
+    test_literal("add", fn_exp);
+
+    auto& args = call_exp->arguments();
+    ASSERT_EQ(3u, args.size());
+    test_literal(1, args[0].get());
+    test_infix_expression(2, "*", 3, args[1].get());
+    test_infix_expression(4, "*", 5, args[2].get());
 }
 
 }
