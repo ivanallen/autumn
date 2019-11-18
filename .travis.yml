@@ -15,11 +15,13 @@ matrix:
         - sudo apt-get install -qq g++-8
         - export CXX="g++-8"
         - export CC="gcc-8"
+        - sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-8 90
+        - sudo pip install codecov
       script:
+        - export CODECOV_TOKEN="082fbbce-1529-4283-80f8-db97e10c159b"
         - make
+        - sh ./get_code_cov
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
       notifications:
         email: true
-
-      # Job2: This is the job of building project on os X.
-
-      # Job3: checking style

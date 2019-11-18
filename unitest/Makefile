@@ -1,5 +1,5 @@
-CXXFLAGS=-g -std=c++17 -Werror -I../googletest/include -I../include
-LDFLAGS=-L../googletest/lib -L../lib -lgtest -lpthread -lautumn
+CXXFLAGS=-g -std=c++17 -Werror -coverage -I../googletest/include -I../include
+LDFLAGS=-L../googletest/lib -L../lib -lgtest -lpthread -lautumn -lgcov
 
 DEPS=../lib/libautumn.a
 
@@ -20,7 +20,7 @@ parser_test:parser_test.o $(DEPS)
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
 
 clean:
-	rm -rf *_test *.o
+	rm -rf *_test *.o *.gcov *.gcno *.gcda
 
 .PHONY:all
 .PHONY:prepare-dep
