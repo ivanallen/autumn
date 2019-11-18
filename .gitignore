@@ -1,6 +1,10 @@
 *.swo
 *.swp
 *.o
+*.gcov
+*.gcda
+*.gcno
 *_test
 libautumn.a
+libgtest.a
 autumn
