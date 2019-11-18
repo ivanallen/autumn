@@ -4,7 +4,7 @@
 
 An easy interpreter to learn.
 
-[](./docs/example.png)
+![example](https://github.com/ivanallen/autumn/blob/master/docs/images/example.png)
 
 ## Features
 
