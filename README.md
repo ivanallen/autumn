@@ -4,6 +4,8 @@
 
 An easy interpreter to learn.
 
+[](./docs/example.png)
+
 ## Features
 
 - Modern C++ style(Based on C++17)

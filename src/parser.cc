@@ -80,13 +80,13 @@ void Parser::next_token() {
 }
 
 void Parser::peek_error(Token::Type type) {
-    std::string error = "expected next token to be "
+    std::string error = "expected next token to be \x1b[1m`"
         + Token::to_string(type) 
-        + ", got "
+        + "\x1b[0m`, got `\x1b[1m"
         + _peek_token.to_string()
-        + " instead. literal `"
+        + "\x1b[0m` instead at literal \x1b[1m`"
         + _peek_token.literal
-        + "`";
+        + "`\x1b[0m";
     _errors.push_back(std::move(error));
 }
 
