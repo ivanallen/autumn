@@ -440,4 +440,42 @@ TEST(Parser, TestFunctionLiteralParsing) {
     test_infix_expression("x", "+", "y", exp);
 }
 
+TEST(Parser, TestFunctionParameterParsing) {
+    std::vector<std::tuple<std::string, std::vector<std::string>>> tests = {
+        {"fn() {}", {}},
+        {"fn(x) {}", {"x"}},
+        {"fn(x, y, z) {}", {"x", "y", "z"}},
+    };
+
+    Parser parser;
+
+    for (auto& test : tests) {
+        auto& input = std::get<0>(test);
+        auto& expect_params = std::get<1>(test);
+
+        auto program = parser.parse(input);
+        for (auto& error : parser.errors()) {
+            std::cout << error << std::endl;
+        }
+        ASSERT_TRUE(program != nullptr);
+
+        auto& statments = program->statments();
+        ASSERT_EQ(1u, statments.size());
+        auto stmt = statments[0]->cast<ExpressionStatment>();
+        ASSERT_TRUE(stmt != nullptr);
+        auto exp = stmt->expression();
+        ASSERT_TRUE(exp != nullptr);
+
+        auto fn_literal = exp->cast<FunctionLiteral>();
+        ASSERT_TRUE(fn_literal != nullptr);
+        auto& params = fn_literal->parameters();
+        ASSERT_EQ(expect_params.size(), params.size());
+
+        for (size_t i = 0; i < expect_params.size(); ++i) {
+            auto& expect_param = expect_params[i];
+            test_literal(expect_param, params[i].get());
+        }
+    }
+}
+
 }
