@@ -5,6 +5,7 @@
 
 #include "lexer.h"
 #include "parser.h"
+#include "evaluator.h"
 
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -13,11 +14,13 @@ const std::string PROMPT = "> ";
 
 void lexer_repl(const std::string& line);
 void parser_repl(const std::string& line);
+void eval_repl(const std::string& line);
 void do_nothing(const std::string& line);
 
 const std::map<std::string, std::function<void(const std::string&)>> REPLS = {
     {"lexer", lexer_repl},    
     {"parser", parser_repl},    
+    {"eval", eval_repl},
 };
 
 int main(int argc, char* argv[]) {
@@ -67,6 +70,14 @@ void parser_repl(const std::string& line) {
         return;
     }
     std::cout << program->to_string() << std::endl;
+}
+
+void eval_repl(const std::string& line) {
+    autumn::Evaluator evaluator;
+    auto obj = evaluator.eval(line);
+    std::cout << "\x1b[1;33m"
+            << obj->inspect()
+            << "\x1b[0m" << std::endl;
 }
 
 void do_nothing(const std::string& line) {
