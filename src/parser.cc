@@ -245,6 +245,7 @@ std::unique_ptr<ast::Expression> Parser::parse_boolean_literal() {
 }
 
 std::vector<std::unique_ptr<ast::Identifier>> Parser::parse_function_parameters() {
+    Defer defer(_tracer.trace(__FUNCTION__));
     std::vector<std::unique_ptr<ast::Identifier>> idents;
     if (peek_token_is(Token::RPAREN)) {
         next_token();
@@ -346,6 +347,7 @@ std::unique_ptr<ast::Expression> Parser::parse_if_expression() {
 }
 
 std::unique_ptr<ast::BlockStatment> Parser::parse_block_statment() {
+    Defer defer(_tracer.trace(__FUNCTION__));
     std::unique_ptr<ast::BlockStatment> block_statment(
             new ast::BlockStatment(_current_token));
 
@@ -383,6 +385,7 @@ std::unique_ptr<ast::Expression> Parser::parse_infix_expression(ast::Expression*
 }
 
 std::unique_ptr<ast::Expression> Parser::parse_call_expression(ast::Expression* left) {
+    Defer defer(_tracer.trace(__FUNCTION__));
     std::unique_ptr<ast::CallExpression> call_expression(
             new ast::CallExpression(_current_token));
 
@@ -394,6 +397,7 @@ std::unique_ptr<ast::Expression> Parser::parse_call_expression(ast::Expression* 
 }
 
 std::vector<std::unique_ptr<ast::Expression>> Parser::parse_call_arguments() {
+    Defer defer(_tracer.trace(__FUNCTION__));
     std::vector<std::unique_ptr<ast::Expression>> args;
 
     if (peek_token_is(Token::RPAREN)) {
