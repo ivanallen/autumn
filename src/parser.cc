@@ -142,6 +142,7 @@ std::unique_ptr<ast::Statment> Parser::parse_statment() {
 }
 
 std::unique_ptr<ast::Statment> Parser::parse_let_statment() {
+    Defer defer(_tracer.trace(__FUNCTION__));
     std::unique_ptr<ast::LetStatment> stmt(new ast::LetStatment(_current_token));
 
     // 查看下一个 token，并取出
@@ -170,6 +171,7 @@ std::unique_ptr<ast::Statment> Parser::parse_let_statment() {
 }
 
 std::unique_ptr<ast::Statment> Parser::parse_return_statment() {
+    Defer defer(_tracer.trace(__FUNCTION__));
     std::unique_ptr<ast::ReturnStatment> stmt(new ast::ReturnStatment(_current_token));
 
     next_token();
