@@ -7,13 +7,16 @@ all:prepare-dep test
 
 prepare-dep:$(DEPS)
 
-test:lexer_test parser_test
+test:lexer_test parser_test evaluator_test
 	@for bin in $^; do ./$$bin; done
 
 lexer_test:lexer_test.o $(DEPS)
 	$(CXX) -o $@ $< $(LDFLAGS)
 
 parser_test:parser_test.o $(DEPS)
+	$(CXX) -o $@ $< $(LDFLAGS)
+
+evaluator_test:evaluator_test.o $(DEPS)
 	$(CXX) -o $@ $< $(LDFLAGS)
 
 %.o:%.cc
