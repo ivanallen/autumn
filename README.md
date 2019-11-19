@@ -10,6 +10,9 @@ An easy interpreter to learn.
 
 - Modern C++ style(Based on C++17)
 - Full comments
+- Support Debug In Repl
+
+![example2](https://github.com/ivanallen/autumn/blob/master/docs/images/example2.png)
 
 ## Quick Start
 
@@ -36,6 +39,26 @@ $ export CC="gcc-8"
 
 ```
 $ make
+```
+
+### Repl
+
+- lexer mode
+
+```
+$ ./autumn lexer
+```
+
+- parser mode
+
+```
+$ ./autumn parser
+```
+
+- debug in parser mode
+
+```
+$ DEBUG_AUTUMN=1 ./autumn parser
 ```
 
 ## Contributor
