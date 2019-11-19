@@ -16,6 +16,7 @@ class Node {
 public:
     virtual std::string token_literal() const = 0;
     virtual std::string to_string() const = 0;
+    virtual ~Node() {}
 
     template<typename T>
     const T* cast() const {
@@ -445,14 +446,14 @@ private:
     std::unique_ptr<Expression> _expression;
 };
 
-class Program {
+class Program : public Node {
 public:
     friend class autumn::Parser;
     const std::vector<std::unique_ptr<Statment>>& statments() const {
         return _statments;
     }
 
-    std::string to_string() const {
+    std::string to_string() const override {
         std::string ret;
         for (auto& stmt : _statments) {
             ret += stmt->to_string();
@@ -460,6 +461,13 @@ public:
         return ret;
     }
 
+    std::string token_literal() const override {
+        if (_statments.size() > 0) {
+            return _statments[0]->token_literal();
+        } else {
+            return std::string();
+        }
+    }
 private:
     void append(Statment* statment) {
         _statments.emplace_back(statment);
