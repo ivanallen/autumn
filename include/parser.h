@@ -8,6 +8,7 @@
 
 #include "lexer.h"
 #include "program.h"
+#include "tracer.h"
 
 namespace autumn {
 
@@ -70,6 +71,8 @@ private:
     std::map<Token::Type, PrefixParseFunc> _prefix_parse_funcs;
     // 用于解析后缀操作符
     std::map<Token::Type, InfixParseFunc> _infix_parse_funcs;
+
+    Tracer _tracer;
 };
 
 } // namespace autumn
