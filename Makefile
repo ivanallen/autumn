@@ -27,7 +27,7 @@ unitest:
 	$(MAKE) -C unitest
 
 autumn:repl/autumn.cc libautumn.a
-	$(CXX) $(CXXFLAGS) -o $@ $< -L./lib -lautumn
+	$(CXX) $(CXXFLAGS) -o $@ $< -L./lib -lautumn -lreadline
 
 clean:
 	rm -rf lib objs *.gcov *.gcno *.gcda

@@ -1,10 +1,15 @@
 #include <functional>
 #include <iostream>
 #include <map>
+#include <stdio.h>
+
 #include "lexer.h"
 #include "parser.h"
 
-const std::string PROMPT = ">> ";
+#include <readline/readline.h>
+#include <readline/history.h>
+
+const std::string PROMPT = "> ";
 
 void lexer_repl(const std::string& line);
 void parser_repl(const std::string& line);
@@ -24,10 +29,18 @@ int main(int argc, char* argv[]) {
         }
     }
     std::string line;
-    std::cout << PROMPT;
-    while (std::getline(std::cin, line)) {
-        repl(line);
-        std::cout << PROMPT;
+    while (true) {
+        char* ln = readline(PROMPT.c_str());
+        if (ln == nullptr) return 0;
+
+        line = ln;
+        free(ln);
+
+        if (!line.empty()) {
+            if (line == "q" || line == "quit") return 0;
+            repl(line);
+            add_history(line.c_str());
+        }
     }
 
     return 0;

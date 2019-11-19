@@ -21,6 +21,7 @@ An easy interpreter to learn.
 - Centos
 
 ```shell
+$ yum install readline-devel.x86_64
 $ yum install -y devtoolset-8-toolchain
 $ scl enable devtoolset-8 bash
 ```
@@ -31,6 +32,7 @@ $ scl enable devtoolset-8 bash
 $ sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 $ sudo apt-get update -qq
 $ sudo apt-get install -qq g++-8
+$ apt-get install lib64readline-dev
 $ export CXX="g++-8"
 $ export CC="gcc-8"
 ```
