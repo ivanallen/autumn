@@ -7,8 +7,11 @@ all:prepare-dep test
 
 prepare-dep:$(DEPS)
 
-test:lexer_test parser_test evaluator_test
+test:format_test lexer_test parser_test evaluator_test
 	@for bin in $^; do ./$$bin; done
+
+format_test:format_test.o $(DEPS)
+	$(CXX) -o $@ $< $(LDFLAGS)
 
 lexer_test:lexer_test.o $(DEPS)
 	$(CXX) -o $@ $< $(LDFLAGS)

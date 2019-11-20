@@ -1,5 +1,6 @@
 #pragma once
 
+#include "format.h"
 #include "object.h"
 #include "parser.h"
 
@@ -11,9 +12,9 @@ public:
     // 使用 shared_ptr 的原因是有些对象是可以共享复用的
     // 比如 true/false/null
     std::shared_ptr<const object::Object> eval(const std::string& input);
-    const std::vector<std::string>& errors() const;
 
 private:
+    bool is_error(const object::Object* obj) const;
     std::shared_ptr<object::Object> eval(const ast::Node* node) const;
     std::shared_ptr<object::Object> eval_program(const std::vector<std::unique_ptr<ast::Statment>>& statments) const;
     std::shared_ptr<object::Object> eval_statments(const std::vector<std::unique_ptr<ast::Statment>>& statments) const;
@@ -36,6 +37,15 @@ private:
 
 private:
     bool is_truthy(const object::Object* obj) const;
+
+    template <typename... Args>
+    std::shared_ptr<object::Error> new_error(std::string_view fmt, Args&&... args) const {
+        return std::make_shared<object::Error>(format(fmt, std::forward<Args>(args)...));
+    }
+
+    std::shared_ptr<object::Error> new_error(std::string_view message) const {
+        return std::make_shared<object::Error>(std::string(message));
+    }
 private:
     Parser _parser;
     std::shared_ptr<object::Object> _null;

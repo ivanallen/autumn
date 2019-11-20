@@ -7,19 +7,27 @@ Evaluator::Evaluator() :
     _true(new object::Boolean(true)),
     _false(new object::Boolean(false)) {
 }
-
-const std::vector<std::string>& Evaluator::errors() const {
-    return _parser.errors();
-}
  
 std::shared_ptr<const object::Object> Evaluator::eval(const std::string& input) {
     auto program = _parser.parse(input);
     return eval(program.get());
 }
 
+bool Evaluator::is_error(const object::Object* obj) const {
+    return typeid(*obj) == typeid(object::Error);
+}
+
 std::shared_ptr<object::Object> Evaluator::eval(const ast::Node* node) const {
     if (node == nullptr) {
-        return _null;
+        std::string message;
+        for (size_t i = 0; i < _parser.errors().size(); ++i) {
+            auto& error = _parser.errors()[i];
+            if (i != 0) {
+                message.append(1, '\n');
+            }
+            message.append(error);
+        }
+        return new_error("abort: {}", message);
     }
 
     if (typeid(*node) == typeid(ast::Program)) {
@@ -34,6 +42,9 @@ std::shared_ptr<object::Object> Evaluator::eval(const ast::Node* node) const {
     } else if (typeid(*node) == typeid(ast::ReturnStatment)) {
         auto n = node->cast<ast::ReturnStatment>();
         auto return_val = eval(n->expression());
+        if (is_error(return_val.get())) {
+            return return_val;
+        }
         return std::make_shared<object::ReturnValue>(return_val);
     } else if (typeid(*node) == typeid(ast::IntegerLiteral)) {
         auto n = node->cast<ast::IntegerLiteral>();
@@ -45,11 +56,20 @@ std::shared_ptr<object::Object> Evaluator::eval(const ast::Node* node) const {
     } else if (typeid(*node) == typeid(ast::PrefixExpression)) {
         auto n = node->cast<ast::PrefixExpression>();
         auto right = eval(n->right());
+        if (is_error(right.get())) {
+            return right;
+        }
         return eval_prefix_expression(n->op(), right.get());
     } else if (typeid(*node) == typeid(ast::InfixExpression)) {
         auto n = node->cast<ast::InfixExpression>();
         auto left = eval(n->left());
+        if (is_error(left.get())) {
+            return left;
+        }
         auto right = eval(n->right());
+        if (is_error(right.get())) {
+            return right;
+        }
         return eval_infix_expression(n->op(), left.get(), right.get());
     } else if (typeid(*node) == typeid(ast::IfExpression)) {
         return eval_if_expression(node->cast<ast::IfExpression>());
@@ -66,6 +86,8 @@ std::shared_ptr<object::Object> Evaluator::eval_program(
         result = eval(stat.get());
         if (typeid(*result) == typeid(object::ReturnValue)) {
             return result->cast<object::ReturnValue>()->value();
+        } else if (typeid(*result) == typeid(object::Error)) {
+            return result;
         }
     }
     return result;
@@ -77,7 +99,8 @@ std::shared_ptr<object::Object> Evaluator::eval_statments(
 
     for (auto& stat : statments) {
         result = eval(stat.get());
-        if (typeid(*result) == typeid(object::ReturnValue)) {
+        if (typeid(*result) == typeid(object::ReturnValue)
+                || typeid(*result) == typeid(object::Error)) {
             return result;
         }
     }
@@ -93,7 +116,7 @@ std::shared_ptr<object::Object> Evaluator::eval_prefix_expression(
         return eval_minus_prefix_operator_expression(right);
     }
 
-    return _null;
+    return new_error("unknown operator: {}{}", op, right->type());
 }
 
 std::shared_ptr<object::Object> Evaluator::eval_bang_operator_expression(const object::Object* right) const {
@@ -109,7 +132,7 @@ std::shared_ptr<object::Object> Evaluator::eval_bang_operator_expression(const o
 
 std::shared_ptr<object::Object> Evaluator::eval_minus_prefix_operator_expression(const object::Object* right) const {
     if (typeid(*right) != typeid(object::Integer)) {
-        return _null;
+        return new_error("unknown operator: -{}", right->type());
     }
 
     auto result = right->cast<object::Integer>();
@@ -146,7 +169,7 @@ std::shared_ptr<object::Object> Evaluator::eval_integer_infix_expression(
         return native_bool_to_boolean_object(left_val->value() != right_val->value());
     }
 
-    return _null;
+    return new_error("unknown operator: {} {} {}", left->type(), op, right->type());
 }
 
 std::shared_ptr<object::Object> Evaluator::eval_infix_expression(
@@ -160,6 +183,8 @@ std::shared_ptr<object::Object> Evaluator::eval_infix_expression(
     if (typeid(*left) == typeid(object::Integer)
             && typeid(*right) == typeid(object::Integer)) {
         return eval_integer_infix_expression(op, left, right);
+    } else if (typeid(*left) != typeid(*right)) {
+        return new_error("type mismatch: {} {} {}", left->type(), op, right->type());
     } else if (op == "==") {
         // 非整数类型，直接比较对象指针
         // 如果是 Boolean 类型，因为全局都是用的同一份，所以指针相同
@@ -167,7 +192,7 @@ std::shared_ptr<object::Object> Evaluator::eval_infix_expression(
     } else if (op == "!=") {
         return native_bool_to_boolean_object(left != right);
     }
-    return _null;
+    return new_error("unknown operator: {} {} {}", left->type(), op, right->type());
 }
 
 bool Evaluator::is_truthy(const object::Object* obj) const {
@@ -187,6 +212,9 @@ std::shared_ptr<object::Object> Evaluator::eval_if_expression(
         return _null;
     }
     auto condition = eval(exp->condition());
+    if (is_error(condition.get())) {
+        return condition;
+    }
 
     if (is_truthy(condition.get()) && exp->consequence() != nullptr) {
         return eval(exp->consequence());
