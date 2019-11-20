@@ -2,22 +2,42 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 namespace autumn {
 namespace object {
-
-class Object {
+class Type {
 public:
-    enum Type {
+    enum TypeValue {
         INTEGER,
         BOOLEAN,
         NULL_OBJECT,
         RETURN_OBJECT,
     };
 
+    Type(TypeValue type) : _type(type) {
+    }
+
+    TypeValue value() const {
+        return _type;
+    }
+
+    friend std::ostream& operator<<(
+            std::ostream& out,
+            const Type& type);
+private:
+
+    static std::unordered_map<int, std::string> _type_to_name;
+
+    TypeValue _type;
+};
+
+class Object {
+public:
+
     Object(Type type) : _type(type) {}
 
-    Type type() const {
+    const Type& type() const {
         return _type;
     }
 
@@ -40,7 +60,7 @@ protected:
 class Integer : public Object {
 public:
     Integer(int value) :
-            Object(Object::Type::INTEGER),
+            Object(Type::INTEGER),
             _value(value) {
     }
 
@@ -58,7 +78,7 @@ private:
 class Boolean : public Object {
 public:
     Boolean(bool value) :
-            Object(Object::Type::BOOLEAN),
+            Object(Type::BOOLEAN),
             _value(value) {
     }
 
@@ -75,7 +95,7 @@ private:
 
 class Null : public Object {
 public:
-    Null() : Object(Object::Type::NULL_OBJECT) {
+    Null() : Object(Type::NULL_OBJECT) {
     }
 
     std::string inspect() const override {
@@ -86,7 +106,7 @@ public:
 class ReturnValue: public Object {
 public:
     ReturnValue(std::shared_ptr<Object>& value) :
-        Object(Object::Type::RETURN_OBJECT),
+        Object(Type::RETURN_OBJECT),
         _value(value) {
     }
 
@@ -99,6 +119,24 @@ public:
     }
 private:
     std::shared_ptr<Object> _value;
+};
+
+class Error : public Object {
+public:
+    Error(const std::string& message) :
+        Object(Type::RETURN_OBJECT),
+        _message(message) {
+    }
+
+    std::string inspect() const override {
+        return "\x1b[1;31merror: \x1b[0m" + _message;
+    }
+
+    const std::string& message() const {
+        return _message;
+    }
+private:
+    std::string _message;
 };
 
 } // namespace object
