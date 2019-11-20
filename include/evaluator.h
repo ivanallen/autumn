@@ -15,6 +15,7 @@ public:
 
 private:
     std::shared_ptr<object::Object> eval(const ast::Node* node) const;
+    std::shared_ptr<object::Object> eval_program(const std::vector<std::unique_ptr<ast::Statment>>& statments) const;
     std::shared_ptr<object::Object> eval_statments(const std::vector<std::unique_ptr<ast::Statment>>& statments) const;
     std::shared_ptr<object::Object> eval_prefix_expression(
             const std::string& op,

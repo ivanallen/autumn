@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 
 namespace autumn {
@@ -11,6 +12,7 @@ public:
         INTEGER,
         BOOLEAN,
         NULL_OBJECT,
+        RETURN_OBJECT,
     };
 
     Object(Type type) : _type(type) {}
@@ -24,6 +26,11 @@ public:
     template <typename T>
     const T* cast() const {
         return dynamic_cast<const T*>(this);
+    }
+
+    template <typename T>
+    T* cast() {
+        return dynamic_cast<T*>(this);
     }
 
 protected:
@@ -74,6 +81,24 @@ public:
     std::string inspect() const override {
         return "null";
     }
+};
+
+class ReturnValue: public Object {
+public:
+    ReturnValue(std::shared_ptr<Object>& value) :
+        Object(Object::Type::RETURN_OBJECT),
+        _value(value) {
+    }
+
+    std::string inspect() const override {
+        return _value->inspect();
+    }
+
+    std::shared_ptr<Object>& value() {
+        return _value;
+    }
+private:
+    std::shared_ptr<Object> _value;
 };
 
 } // namespace object
