@@ -1,5 +1,6 @@
 #pragma once
 
+#include "environment.h"
 #include "format.h"
 #include "object.h"
 #include "parser.h"
@@ -13,6 +14,7 @@ public:
     // 比如 true/false/null
     std::shared_ptr<const object::Object> eval(const std::string& input);
 
+    void reset_env();
 private:
     bool is_error(const object::Object* obj) const;
     std::shared_ptr<object::Object> eval(const ast::Node* node) const;
@@ -34,6 +36,8 @@ private:
     std::shared_ptr<object::Object> native_bool_to_boolean_object(bool input) const;
     std::shared_ptr<object::Object> eval_if_expression(
             const ast::IfExpression* exp) const;
+    std::shared_ptr<object::Object> eval_identifier(
+            const ast::Identifier* identifier) const;
 
 private:
     bool is_truthy(const object::Object* obj) const;
@@ -51,6 +55,7 @@ private:
     std::shared_ptr<object::Object> _null;
     std::shared_ptr<object::Object> _true;
     std::shared_ptr<object::Object> _false;
+    mutable std::unique_ptr<object::Environment> _env;
 };
 
 } // namespace autumn

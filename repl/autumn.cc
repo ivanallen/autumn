@@ -17,6 +17,8 @@ void parser_repl(const std::string& line);
 void eval_repl(const std::string& line);
 void do_nothing(const std::string& line);
 
+autumn::Evaluator evaluator;
+
 const std::map<std::string, std::function<void(const std::string&)>> REPLS = {
     {"lexer", lexer_repl},    
     {"parser", parser_repl},    
@@ -73,7 +75,6 @@ void parser_repl(const std::string& line) {
 }
 
 void eval_repl(const std::string& line) {
-    autumn::Evaluator evaluator;
     auto obj = evaluator.eval(line);
     std::cout << "\x1b[1;33m"
             << obj->inspect()
