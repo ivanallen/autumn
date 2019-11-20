@@ -8,7 +8,7 @@ Evaluator::Evaluator() :
     _false(new object::Boolean(false)) {
 }
  
-const std::shared_ptr<object::Object> Evaluator::eval(const std::string& input) {
+std::shared_ptr<const object::Object> Evaluator::eval(const std::string& input) {
     auto program = _parser.parse(input);
     return eval(program.get());
 }
@@ -35,6 +35,11 @@ std::shared_ptr<object::Object> Evaluator::eval(const ast::Node* node) const {
         auto n = node->cast<ast::PrefixExpression>();
         auto right = eval(n->right());
         return eval_prefix_expression(n->op(), right.get());
+    } else if (typeid(*node) == typeid(ast::InfixExpression)) {
+        auto n = node->cast<ast::InfixExpression>();
+        auto left = eval(n->left());
+        auto right = eval(n->right());
+        return eval_infix_expression(n->op(), left.get(), right.get());
     }
 
     return _null;
@@ -50,7 +55,9 @@ std::shared_ptr<object::Object> Evaluator::eval_statments(
     return result;
 }
 
-std::shared_ptr<object::Object> Evaluator::eval_prefix_expression(const std::string& op, const object::Object* right) const {
+std::shared_ptr<object::Object> Evaluator::eval_prefix_expression(
+        const std::string& op,
+        const object::Object* right) const {
     if (op == "!") {
         return eval_bang_operator_expression(right);
     } else if (op == "-") {
@@ -78,6 +85,60 @@ std::shared_ptr<object::Object> Evaluator::eval_minus_prefix_operator_expression
 
     auto result = right->cast<object::Integer>();
     return std::make_shared<object::Integer>(-result->value());
+}
+
+
+std::shared_ptr<object::Object> Evaluator::native_bool_to_boolean_object(bool input) const {
+    return input ? _true : _false;
+};
+
+std::shared_ptr<object::Object> Evaluator::eval_integer_infix_expression(
+        const std::string& op,
+        const object::Object* left,
+        const object::Object* right) const {
+    auto left_val = left->cast<object::Integer>();
+    auto right_val = right->cast<object::Integer>();
+
+    if (op == "+") {
+        return std::make_shared<object::Integer>(left_val->value() + right_val->value());
+    } else if (op == "-") {
+        return std::make_shared<object::Integer>(left_val->value() - right_val->value());
+    } else if (op == "*") {
+        return std::make_shared<object::Integer>(left_val->value() * right_val->value());
+    } else if (op == "/") {
+        return std::make_shared<object::Integer>(left_val->value() / right_val->value());
+    } else if (op == "<") {
+        return native_bool_to_boolean_object(left_val->value() < right_val->value());
+    } else if (op == ">") {
+        return native_bool_to_boolean_object(left_val->value() > right_val->value());
+    } else if (op == "==") {
+        return native_bool_to_boolean_object(left_val->value() == right_val->value());
+    } else if (op == "!=") {
+        return native_bool_to_boolean_object(left_val->value() != right_val->value());
+    }
+
+    return _null;
+}
+
+std::shared_ptr<object::Object> Evaluator::eval_infix_expression(
+        const std::string& op,
+        const object::Object* left,
+        const object::Object* right) const {
+    // 如果你想对其它类型做单独处理，改这个位置即可
+    // 原作者在其书中调侃：十年后，当 Monkey 语言出名后，可能会有人在 stackoverflow 上提问：
+    // 为什么在 Monkey 语言中(当前我们的项目叫 Autum)，整型值的比较比其它类型要慢呢？
+    // 此时你可以回复：balabala...，来自：M78 星云，Allen
+    if (typeid(*left) == typeid(object::Integer)
+            && typeid(*right) == typeid(object::Integer)) {
+        return eval_integer_infix_expression(op, left, right);
+    } else if (op == "==") {
+        // 非整数类型，直接比较对象指针
+        // 如果是 Boolean 类型，因为全局都是用的同一份，所以指针相同
+        return native_bool_to_boolean_object(left == right);
+    } else if (op == "!=") {
+        return native_bool_to_boolean_object(left != right);
+    }
+    return _null;
 }
 
 } // namespace autumn
