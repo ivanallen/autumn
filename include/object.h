@@ -50,7 +50,9 @@ private:
 
 class Boolean : public Object {
 public:
-    Boolean() : Object(Object::Type::BOOLEAN) {
+    Boolean(bool value) :
+            Object(Object::Type::BOOLEAN),
+            _value(value) {
     }
 
     std::string inspect() const override {
