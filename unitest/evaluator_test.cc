@@ -25,6 +25,10 @@ void test_boolean_object(const Object* object, bool expect) {
     EXPECT_EQ(expect, result->value());
 }
 
+void test_null_object(const Object* object) {
+    EXPECT_EQ(typeid(*object), typeid(Null));
+}
+
 TEST(Evaluator, TestEvalIntegerExpression) {
     std::vector<std::tuple<std::string, int>> tests = {
         {"5", 5},
@@ -101,6 +105,33 @@ TEST(Evaluator, TestBangOperator) {
         auto object = evaluator.eval(input);
 
         test_boolean_object(object.get(), expect);
+    }
+}
+
+TEST(Evaluator, TestIfElseExpression) {
+    std::vector<std::tuple<std::string, std::any>> tests = {
+        {"if (true) { 10 }", 10},
+        {"if (false) { 10 }", nullptr},
+        {"if (1) { 10 }", 10},
+        {"if (1 < 2) { 10 }", 10},
+        {"if (1 > 2) { 10 }", nullptr},
+        {"if (1 > 2) { 10 } else { 20 }", 20},
+        {"if (1 < 2) { 10 } else { 20 }", 10},
+    };
+
+    Evaluator evaluator;
+
+    for (auto& test : tests) {
+        auto& input = std::get<0>(test);
+        auto& expect = std::get<1>(test);
+
+        auto object = evaluator.eval(input);
+
+        if (expect.type() == typeid(int)) {
+            test_integer_object(object.get(), std::any_cast<int>(expect));
+        } else {
+            test_null_object(object.get());
+        }
     }
 }
 

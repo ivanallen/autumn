@@ -75,6 +75,10 @@ void parser_repl(const std::string& line) {
 void eval_repl(const std::string& line) {
     autumn::Evaluator evaluator;
     auto obj = evaluator.eval(line);
+    for (auto& error : evaluator.errors()) {
+        std::cerr << "\x1b[1;31merror: \x1b[0m"
+            << error << std::endl;
+    }
     std::cout << "\x1b[1;33m"
             << obj->inspect()
             << "\x1b[0m" << std::endl;
