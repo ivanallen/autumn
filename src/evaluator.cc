@@ -5,7 +5,8 @@ namespace autumn {
 Evaluator::Evaluator() :
     _null(new object::Null()),
     _true(new object::Boolean(true)),
-    _false(new object::Boolean(false)) {
+    _false(new object::Boolean(false)),
+    _env(new object::Environment()) {
 }
  
 std::shared_ptr<const object::Object> Evaluator::eval(const std::string& input) {
@@ -15,6 +16,10 @@ std::shared_ptr<const object::Object> Evaluator::eval(const std::string& input) 
 
 bool Evaluator::is_error(const object::Object* obj) const {
     return typeid(*obj) == typeid(object::Error);
+}
+
+void Evaluator::reset_env() {
+    _env.reset(new object::Environment());
 }
 
 std::shared_ptr<object::Object> Evaluator::eval(const ast::Node* node) const {
@@ -46,6 +51,14 @@ std::shared_ptr<object::Object> Evaluator::eval(const ast::Node* node) const {
             return return_val;
         }
         return std::make_shared<object::ReturnValue>(return_val);
+    } else if (typeid(*node) == typeid(ast::LetStatment)) {
+        auto n = node->cast<ast::LetStatment>();
+        auto val = eval(n->expression());
+        if (is_error(val.get())) {
+            return val;
+        }
+
+        _env->set(n->identifier()->value(), val);
     } else if (typeid(*node) == typeid(ast::IntegerLiteral)) {
         auto n = node->cast<ast::IntegerLiteral>();
         return std::shared_ptr<object::Integer>(
@@ -73,6 +86,8 @@ std::shared_ptr<object::Object> Evaluator::eval(const ast::Node* node) const {
         return eval_infix_expression(n->op(), left.get(), right.get());
     } else if (typeid(*node) == typeid(ast::IfExpression)) {
         return eval_if_expression(node->cast<ast::IfExpression>());
+    } else if (typeid(*node) == typeid(ast::Identifier)) {
+        return eval_identifier(node->cast<ast::Identifier>());
     }
 
     return _null;
@@ -91,6 +106,14 @@ std::shared_ptr<object::Object> Evaluator::eval_program(
         }
     }
     return result;
+}
+
+std::shared_ptr<object::Object> Evaluator::eval_identifier(const ast::Identifier* identifier) const {
+    auto val = _env->get(identifier->value());
+    if (val == nullptr) {
+        return new_error("identifier not found: {}", identifier->value());
+    }
+    return val;
 }
 
 std::shared_ptr<object::Object> Evaluator::eval_statments(

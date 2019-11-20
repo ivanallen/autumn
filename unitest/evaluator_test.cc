@@ -190,4 +190,25 @@ TEST(Evaluator, TestErrorHandling) {
     }
 }
 
+TEST(Evaluator, TestLetStatment) {
+    std::vector<std::tuple<std::string, int>> tests = {
+        {"let a = 5; a", 5},
+        {"let a = 5 * 5; a", 25},
+        {"let a = 50; let b = a; b", 50},
+        {"let a = 5; let b = a; let c = a + b + 5; c;", 15},
+    };
+
+    Evaluator evaluator;
+
+    for (auto& test : tests) {
+        auto& input = std::get<0>(test);
+        auto expect = std::get<1>(test);
+
+        evaluator.reset_env();
+        auto object = evaluator.eval(input);
+
+        test_integer_object(object.get(), expect);
+    }
+}
+
 }
