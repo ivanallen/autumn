@@ -11,6 +11,7 @@ public:
     // 使用 shared_ptr 的原因是有些对象是可以共享复用的
     // 比如 true/false/null
     std::shared_ptr<const object::Object> eval(const std::string& input);
+    const std::vector<std::string>& errors() const;
 
 private:
     std::shared_ptr<object::Object> eval(const ast::Node* node) const;
@@ -29,10 +30,13 @@ private:
     std::shared_ptr<object::Object> eval_bang_operator_expression(const object::Object* right) const;
     std::shared_ptr<object::Object> eval_minus_prefix_operator_expression(const object::Object* right) const;
     std::shared_ptr<object::Object> native_bool_to_boolean_object(bool input) const;
+    std::shared_ptr<object::Object> eval_if_expression(
+            const ast::IfExpression* exp) const;
 
 private:
-    Parser _parser;
+    bool is_truthy(const object::Object* obj) const;
 private:
+    Parser _parser;
     std::shared_ptr<object::Object> _null;
     std::shared_ptr<object::Object> _true;
     std::shared_ptr<object::Object> _false;

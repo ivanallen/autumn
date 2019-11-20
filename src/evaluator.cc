@@ -7,6 +7,10 @@ Evaluator::Evaluator() :
     _true(new object::Boolean(true)),
     _false(new object::Boolean(false)) {
 }
+
+const std::vector<std::string>& Evaluator::errors() const {
+    return _parser.errors();
+}
  
 std::shared_ptr<const object::Object> Evaluator::eval(const std::string& input) {
     auto program = _parser.parse(input);
@@ -24,6 +28,9 @@ std::shared_ptr<object::Object> Evaluator::eval(const ast::Node* node) const {
     } else if (typeid(*node) == typeid(ast::ExpressionStatment)) {
         auto n = node->cast<ast::ExpressionStatment>();
         return eval(n->expression());
+    } else if (typeid(*node) == typeid(ast::BlockStatment)) {
+        auto n = node->cast<ast::BlockStatment>();
+        return eval_statments(n->statments());
     } else if (typeid(*node) == typeid(ast::IntegerLiteral)) {
         auto n = node->cast<ast::IntegerLiteral>();
         return std::shared_ptr<object::Integer>(
@@ -40,6 +47,8 @@ std::shared_ptr<object::Object> Evaluator::eval(const ast::Node* node) const {
         auto left = eval(n->left());
         auto right = eval(n->right());
         return eval_infix_expression(n->op(), left.get(), right.get());
+    } else if (typeid(*node) == typeid(ast::IfExpression)) {
+        return eval_if_expression(node->cast<ast::IfExpression>());
     }
 
     return _null;
@@ -138,6 +147,33 @@ std::shared_ptr<object::Object> Evaluator::eval_infix_expression(
     } else if (op == "!=") {
         return native_bool_to_boolean_object(left != right);
     }
+    return _null;
+}
+
+bool Evaluator::is_truthy(const object::Object* obj) const {
+    if (obj == _null.get()) {
+        return false;
+    } else if (obj == _true.get()) {
+        return true;
+    } else if (obj == _false.get()) {
+        return false;
+    }
+    return true;
+}
+
+std::shared_ptr<object::Object> Evaluator::eval_if_expression(
+            const ast::IfExpression* exp) const {
+    if (exp->condition() == nullptr) {
+        return _null;
+    }
+    auto condition = eval(exp->condition());
+
+    if (is_truthy(condition.get()) && exp->consequence() != nullptr) {
+        return eval(exp->consequence());
+    } else if (exp->alternative() != nullptr) {
+        return eval(exp->alternative());
+    }
+
     return _null;
 }
 
