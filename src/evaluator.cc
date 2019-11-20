@@ -24,13 +24,17 @@ std::shared_ptr<object::Object> Evaluator::eval(const ast::Node* node) const {
 
     if (typeid(*node) == typeid(ast::Program)) {
         auto n = node->cast<ast::Program>();
-        return eval_statments(n->statments());
+        return eval_program(n->statments());
     } else if (typeid(*node) == typeid(ast::ExpressionStatment)) {
         auto n = node->cast<ast::ExpressionStatment>();
         return eval(n->expression());
     } else if (typeid(*node) == typeid(ast::BlockStatment)) {
         auto n = node->cast<ast::BlockStatment>();
         return eval_statments(n->statments());
+    } else if (typeid(*node) == typeid(ast::ReturnStatment)) {
+        auto n = node->cast<ast::ReturnStatment>();
+        auto return_val = eval(n->expression());
+        return std::make_shared<object::ReturnValue>(return_val);
     } else if (typeid(*node) == typeid(ast::IntegerLiteral)) {
         auto n = node->cast<ast::IntegerLiteral>();
         return std::shared_ptr<object::Integer>(
@@ -54,12 +58,28 @@ std::shared_ptr<object::Object> Evaluator::eval(const ast::Node* node) const {
     return _null;
 }
 
+std::shared_ptr<object::Object> Evaluator::eval_program(
+        const std::vector<std::unique_ptr<ast::Statment>>& statments) const {
+    std::shared_ptr<object::Object> result;
+
+    for (auto& stat : statments) {
+        result = eval(stat.get());
+        if (typeid(*result) == typeid(object::ReturnValue)) {
+            return result->cast<object::ReturnValue>()->value();
+        }
+    }
+    return result;
+}
+
 std::shared_ptr<object::Object> Evaluator::eval_statments(
         const std::vector<std::unique_ptr<ast::Statment>>& statments) const {
     std::shared_ptr<object::Object> result;
 
     for (auto& stat : statments) {
         result = eval(stat.get());
+        if (typeid(*result) == typeid(object::ReturnValue)) {
+            return result;
+        }
     }
     return result;
 }

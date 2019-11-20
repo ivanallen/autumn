@@ -135,4 +135,30 @@ TEST(Evaluator, TestIfElseExpression) {
     }
 }
 
+TEST(Evaluator, TestReturnStatment) {
+    std::vector<std::tuple<std::string, int>> tests = {
+        {"return 10;", 10},
+        {"return 10; 9;", 10},
+        {"return 2 * 5; 9;", 10},
+        {"9; return 2 * 5; 9;", 10},
+        { R"(
+                if (10 > 1) {
+                    if (10 > 1) { return 10; }
+                    return 1;
+                }
+            )", 10},
+    };
+
+    Evaluator evaluator;
+
+    for (auto& test : tests) {
+        auto& input = std::get<0>(test);
+        auto expect = std::get<1>(test);
+
+        auto object = evaluator.eval(input);
+
+        test_integer_object(object.get(), expect);
+    }
+}
+
 }
