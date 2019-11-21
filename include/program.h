@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "token.h"
+
 namespace autumn {
 
 class Parser;
@@ -21,6 +23,11 @@ public:
     template<typename T>
     const T* cast() const {
         return dynamic_cast<const T*>(this);
+    };
+
+    template<typename T>
+    T* cast() {
+        return dynamic_cast<T*>(this);
     };
 };
 
@@ -267,12 +274,12 @@ public:
     friend class autumn::Parser;
     using Expression::Expression;
 
-    const std::vector<std::unique_ptr<Identifier>>& parameters() const {
+    std::vector<std::shared_ptr<Identifier>>& parameters() const {
         return _parameters;
     }
 
-    const BlockStatment* body() const {
-        return _body.get();
+    std::shared_ptr<BlockStatment>& body() const {
+        return _body;
     }
 
     std::string to_string() const override {
@@ -299,16 +306,17 @@ private:
         _parameters.emplace_back(parameter);
     }
 
-    void set_parameters(std::vector<std::unique_ptr<Identifier>>&& parameters) {
-        _parameters = std::move(parameters);
+    void set_parameters(std::vector<std::shared_ptr<Identifier>>& parameters) {
+        _parameters = parameters;
     }
 
     void set_body(BlockStatment* body) {
         _body.reset(body);
     }
 private:
-    std::vector<std::unique_ptr<Identifier>> _parameters;
-    std::unique_ptr<BlockStatment> _body;
+    // shared_ptr 的原因在于，这两个字段未来会被 object::Function 共享
+    mutable std::vector<std::shared_ptr<Identifier>> _parameters;
+    mutable std::shared_ptr<BlockStatment> _body;
 };
 
 class CallExpression : public Expression {

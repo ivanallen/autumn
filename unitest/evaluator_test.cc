@@ -211,4 +211,64 @@ TEST(Evaluator, TestLetStatment) {
     }
 }
 
+TEST(Evaluator, TestFunctionObject) {
+    std::string input = "fn(x) { x + 2; }";
+    Evaluator evaluator;
+    auto object = evaluator.eval(input);
+    auto fn_obj = object->cast<Function>();
+    ASSERT_TRUE(fn_obj != nullptr);
+    auto& params = fn_obj->parameters();
+    EXPECT_EQ(1u, params.size());
+    EXPECT_STREQ("x", params[0]->to_string().c_str());
+    ASSERT_TRUE(fn_obj->body() != nullptr);
+    EXPECT_STREQ("(x + 2)", fn_obj->body()->to_string().c_str());
+}
+
+TEST(Evaluator, TestFunctionApplication) {
+    std::vector<std::tuple<std::string, int>> tests = {
+        {"let identity = fn(x) { x; }; identity(5);", 5},
+        {"let identity = fn(x) { return x; }; identity(5);", 5},
+        {"let double = fn(x) { x * 2; }; double(5);", 10},
+        {"let add = fn(x, y) { x + y; }; add(5, 5);", 10},
+        {"let add = fn(x, y) { x + y; }; add(5 + 5, add(5, 5));", 20},
+        {"fn(x) { x; }(5)", 5},
+    };
+
+    Evaluator evaluator;
+
+    for (auto& test : tests) {
+        auto& input = std::get<0>(test);
+        auto expect = std::get<1>(test);
+
+        evaluator.reset_env();
+        auto object = evaluator.eval(input);
+
+        test_integer_object(object.get(), expect);
+    }
+}
+
+TEST(Evaluator, TestClosures) {
+    std::string input = R"(
+        let foo = fn(x) {
+            return fn(y) {
+                return x + y;
+            };
+        };
+
+        let addtwo = foo(2);
+        addtwo(10);
+    )";
+
+    Evaluator evaluator;
+
+    auto object = evaluator.eval(input);
+
+    if (typeid(object) == typeid(object::Error)) {
+        std::cout << object->inspect() << std::endl;
+        ASSERT_TRUE(false);
+    }
+
+    test_integer_object(object.get(), 12);
+}
+
 }

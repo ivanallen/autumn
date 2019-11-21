@@ -10,9 +10,15 @@ namespace object {
 class Object;
 class Environment {
 public:
+    Environment() {}
+    Environment(std::shared_ptr<Environment>& outer) :
+            _outer(outer) {}
     std::shared_ptr<Object> get(const std::string& name) {
         auto it = _store.find(name);
         if (it == _store.end()) {
+            if (_outer != nullptr) {
+                return _outer->get(name);
+            }
             return nullptr;
         }
 
@@ -26,6 +32,7 @@ public:
     }
 private:
     std::map<std::string, std::shared_ptr<Object>> _store;
+    std::shared_ptr<Environment> _outer;
 };
 
 } // namespace object

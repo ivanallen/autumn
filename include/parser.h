@@ -43,7 +43,7 @@ private:
     std::unique_ptr<ast::Statment> parse_return_statment();
     std::unique_ptr<ast::Statment> parse_expression_statment();
     std::unique_ptr<ast::BlockStatment> parse_block_statment();
-    std::vector<std::unique_ptr<ast::Identifier>> parse_function_parameters();
+    std::vector<std::shared_ptr<ast::Identifier>> parse_function_parameters();
     std::vector<std::unique_ptr<ast::Expression>> parse_call_arguments();
 
     std::unique_ptr<ast::Expression> parse_expression(Precedence precedence);

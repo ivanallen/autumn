@@ -9,6 +9,7 @@ std::unordered_map<int, std::string> Type::_type_to_name = {
     {BOOLEAN, "BOOLEAN"},
     {NULL_OBJECT, "NULL_OBJECT"},
     {RETURN_OBJECT, "RETURN_OBJECT"},
+    {FUNCTION_OBJECT, "FUNCTION_OBJECT"},
 };
 
 std::ostream& operator<<(std::ostream& out, const Type& type) {
