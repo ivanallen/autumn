@@ -11,10 +11,9 @@ prepare-dep:
 	@mkdir -p objs
 	@mkdir -p lib
 
-libgtest:libgtest.a
-	@mv $^ lib
+libgtest:./lib/libgtest.a
 
-libgtest.a:$(OBJ)
+./lib/libgtest.a:$(OBJ)
 	ar -r $@ $^
 
 objs/%.o:src/%.cc $(HEADERS)

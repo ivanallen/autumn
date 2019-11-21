@@ -11,10 +11,9 @@ prepare-dep:
 	@mkdir -p objs
 	@mkdir -p lib
 
-libautumn:libautumn.a
-	@mv $^ lib
+libautumn:./lib/libautumn.a
 
-libautumn.a:$(OBJ)
+./lib/libautumn.a:$(OBJ)
 	ar -r $@ $^
 
 objs/%.o:src/%.cc $(HEADERS)
@@ -26,7 +25,7 @@ googletest:
 unitest:
 	$(MAKE) -C unitest
 
-autumn:repl/autumn.cc libautumn.a
+autumn:repl/autumn.cc ./lib/libautumn.a
 	$(CXX) $(CXXFLAGS) -o $@ $< -L./lib -lautumn -lreadline
 
 clean:
@@ -36,7 +35,7 @@ clean:
 
 .PHONY:all
 .PHONY:prepare-dep
-.PHONY:autumn
+.PHONY:libautumn
 .PHONY:googletest
 .PHONY:unitest
 .PHONY:clean

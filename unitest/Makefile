@@ -1,4 +1,4 @@
-CXXFLAGS=-g -std=c++17 -Werror -coverage -I../googletest/include -I../include
+CXXFLAGS=-g -std=c++17 -Werror -fno-access-control -coverage -I../googletest/include -I../include
 LDFLAGS=-L../googletest/lib -L../lib -lgtest -lpthread -lautumn -lgcov
 
 DEPS=../lib/libautumn.a
