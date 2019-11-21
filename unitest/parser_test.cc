@@ -2,10 +2,6 @@
 #include <string>
 #include <tuple>
 #include <gtest/gtest.h>
-
-// for test
-#define private public
-
 #include "parser.h"
 
 using namespace autumn;
