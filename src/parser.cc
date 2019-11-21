@@ -246,9 +246,9 @@ std::unique_ptr<ast::Expression> Parser::parse_boolean_literal() {
     return std::unique_ptr<ast::Expression>(new ast::BooleanLiteral(_current_token));
 }
 
-std::vector<std::unique_ptr<ast::Identifier>> Parser::parse_function_parameters() {
+std::vector<std::shared_ptr<ast::Identifier>> Parser::parse_function_parameters() {
     Defer defer(_tracer.trace(__FUNCTION__));
-    std::vector<std::unique_ptr<ast::Identifier>> idents;
+    std::vector<std::shared_ptr<ast::Identifier>> idents;
     if (peek_token_is(Token::RPAREN)) {
         next_token();
         return idents;
@@ -279,7 +279,7 @@ std::unique_ptr<ast::Expression> Parser::parse_function_literal() {
     }
 
     auto params = parse_function_parameters();
-    function_literal->set_parameters(std::move(params));
+    function_literal->set_parameters(params);
 
     if (!expect_peek(Token::LBRACE)) {
         return nullptr;

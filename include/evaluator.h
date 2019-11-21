@@ -17,28 +17,43 @@ public:
     void reset_env();
 private:
     bool is_error(const object::Object* obj) const;
-    std::shared_ptr<object::Object> eval(const ast::Node* node) const;
-    std::shared_ptr<object::Object> eval_program(const std::vector<std::unique_ptr<ast::Statment>>& statments) const;
-    std::shared_ptr<object::Object> eval_statments(const std::vector<std::unique_ptr<ast::Statment>>& statments) const;
+    std::shared_ptr<object::Object> eval(const ast::Node* node, std::shared_ptr<object::Environment>& env) const;
+    std::shared_ptr<object::Object> eval_program(const std::vector<std::unique_ptr<ast::Statment>>& statments, std::shared_ptr<object::Environment>& env) const;
+    std::shared_ptr<object::Object> eval_statments(const std::vector<std::unique_ptr<ast::Statment>>& statments, std::shared_ptr<object::Environment>& env) const;
     std::shared_ptr<object::Object> eval_prefix_expression(
             const std::string& op,
-            const object::Object* object) const;
+            const object::Object* object,
+            std::shared_ptr<object::Environment>& env) const;
     std::shared_ptr<object::Object> eval_infix_expression(
             const std::string& op,
             const object::Object* left,
-            const object::Object* right) const;
+            const object::Object* right,
+            std::shared_ptr<object::Environment>& env) const;
     std::shared_ptr<object::Object> eval_integer_infix_expression(
             const std::string& op,
             const object::Object* left,
+            const object::Object* right,
+            std::shared_ptr<object::Environment>& env) const;
+    std::shared_ptr<object::Object> eval_bang_operator_expression(
             const object::Object* right) const;
-    std::shared_ptr<object::Object> eval_bang_operator_expression(const object::Object* right) const;
     std::shared_ptr<object::Object> eval_minus_prefix_operator_expression(const object::Object* right) const;
     std::shared_ptr<object::Object> native_bool_to_boolean_object(bool input) const;
     std::shared_ptr<object::Object> eval_if_expression(
-            const ast::IfExpression* exp) const;
+            const ast::IfExpression* exp,
+            std::shared_ptr<object::Environment>& env) const;
     std::shared_ptr<object::Object> eval_identifier(
-            const ast::Identifier* identifier) const;
+            const ast::Identifier* identifier,
+            std::shared_ptr<object::Environment>& env) const;
+    std::vector<std::shared_ptr<object::Object>> eval_expressions(
+            const std::vector<std::unique_ptr<ast::Expression>>& exps,
+            std::shared_ptr<object::Environment>& env) const;
 
+    std::shared_ptr<object::Object> apply_function(
+            const object::Object* fn,
+            std::vector<std::shared_ptr<object::Object>>& args) const;
+    std::shared_ptr<object::Environment> extend_function_env(
+            const object::Function* fn,
+            std::vector<std::shared_ptr<object::Object>>& args) const;
 private:
     bool is_truthy(const object::Object* obj) const;
 
@@ -55,7 +70,7 @@ private:
     std::shared_ptr<object::Object> _null;
     std::shared_ptr<object::Object> _true;
     std::shared_ptr<object::Object> _false;
-    mutable std::unique_ptr<object::Environment> _env;
+    mutable std::shared_ptr<object::Environment> _env;
 };
 
 } // namespace autumn

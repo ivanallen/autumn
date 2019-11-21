@@ -4,6 +4,8 @@
 #include <string>
 #include <unordered_map>
 
+#include "program.h"
+
 namespace autumn {
 namespace object {
 class Type {
@@ -13,6 +15,7 @@ public:
         BOOLEAN,
         NULL_OBJECT,
         RETURN_OBJECT,
+        FUNCTION_OBJECT,
     };
 
     Type(TypeValue type) : _type(type) {
@@ -137,6 +140,57 @@ public:
     }
 private:
     std::string _message;
+};
+
+class Environment;
+class Function : public Object {
+public:
+    Function(
+            std::vector<std::shared_ptr<ast::Identifier>>& parameters,
+            std::shared_ptr<ast::BlockStatment> body,
+            std::shared_ptr<Environment>& env) :
+                Object(Type::FUNCTION_OBJECT),
+                _parameters(parameters),
+                _body(body),
+                _env(env) {
+    }
+
+    const std::vector<std::shared_ptr<ast::Identifier>>& parameters() const {
+        return _parameters;
+    }
+
+    const ast::BlockStatment* body() const {
+        return _body.get();
+    }
+
+    std::string inspect() const override {
+        if (_body == nullptr) {
+            return std::string();
+        }
+
+        std::string ret = "fn";
+
+        ret.append(1, '(');
+        for (size_t i = 0; i < _parameters.size(); ++i) {
+            if (i != 0) {
+                ret.append(", ");
+            }
+            ret.append(_parameters[i]->to_string());
+        }
+        ret.append(") {");
+        ret.append(_body->to_string());
+        ret.append("}");
+
+        return ret;
+    }
+
+    std::shared_ptr<Environment>& env() const {
+        return _env;
+    }
+private:
+    std::vector<std::shared_ptr<ast::Identifier>> _parameters;
+    std::shared_ptr<ast::BlockStatment> _body;
+    mutable std::shared_ptr<Environment> _env;
 };
 
 } // namespace object
