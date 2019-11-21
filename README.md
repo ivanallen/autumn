@@ -10,9 +10,15 @@ An easy interpreter to learn.
 
 - Modern C++ style(Based on C++17)
 - Full comments
-- Support Debug In Repl
+- Support debug in repl
 
 ![example2](https://github.com/ivanallen/autumn/blob/master/docs/images/example2.png)
+
+- Higher-order functions supported
+
+![example3](https://github.com/ivanallen/autumn/blob/master/docs/images/example3.png)
+
+- ...
 
 ## Quick Start
 
