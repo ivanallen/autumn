@@ -1,6 +1,7 @@
 # Autumn
 
 [![Build Status](https://travis-ci.com/ivanallen/autumn.svg?branch=master)](https://travis-ci.com/ivanallen/autumn)
+[![codecov](https://codecov.io/gh/ivanallen/autumn/branch/master/graph/badge.svg)](https://codecov.io/gh/ivanallen/autumn)
 
 An easy interpreter to learn.
 
