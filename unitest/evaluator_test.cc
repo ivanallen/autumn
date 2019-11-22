@@ -306,6 +306,13 @@ TEST(Evaluator, TestStringExpression) {
     }
 }
 
+TEST(Evaluator, TestStringConcatenation) {
+    std::string input = R"("hello" + " " + "world")";
+    Evaluator evaluator;
+    auto object = evaluator.eval(input);
+    test_string_object(object.get(), "hello world");
+}
+
 TEST(Evaluator, TestBuiltinFunctions) {
     std::vector<std::tuple<std::string, std::any>> tests = {
         {R"(len(""))", 0},
