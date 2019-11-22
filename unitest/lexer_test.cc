@@ -108,6 +108,7 @@ TEST(Lexer, TestNontrivial) {
         3 <= 6 >= 3;
         "foobar"
         "foo bar"
+        [1, 2]
     )";
 
     Token expect_tokens[] = {
@@ -193,6 +194,11 @@ TEST(Lexer, TestNontrivial) {
         {Token::SEMICOLON, ";"},
         {Token::STRING, "foobar"},
         {Token::STRING, "foo bar"},
+        {Token::LBRACKET, "["},
+        {Token::INT, "1"},
+        {Token::COMMA, ","},
+        {Token::INT, "2"},
+        {Token::RBRACKET, "]"},
         {Token::END, ""},
     };
 

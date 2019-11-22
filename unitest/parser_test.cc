@@ -525,4 +525,31 @@ TEST(Parser, TestCallExpressionParsing) {
     test_infix_expression(4, "*", 5, args[2].get());
 }
 
+TEST(Parser, TestParsingArrayLiteral) {
+    std::string input = "[1, 2 * 2, 3 + 3]";
+
+    Parser parser;
+    auto program = parser.parse(input);
+    for (auto& error : parser.errors()) {
+        std::cout << error << std::endl;
+    }
+    ASSERT_TRUE(program != nullptr);
+
+    auto& statments = program->statments();
+    ASSERT_EQ(1u, statments.size());
+    auto stmt = statments[0]->cast<ExpressionStatment>();
+    ASSERT_TRUE(stmt != nullptr);
+    auto exp = stmt->expression();
+    ASSERT_TRUE(exp != nullptr);
+    auto array_literal = exp->cast<ArrayLiteral>();
+    ASSERT_TRUE(array_literal != nullptr);
+
+    auto& elems = array_literal->elements();
+
+    ASSERT_EQ(3u, elems.size());
+    test_literal(1, elems[0].get());
+    test_infix_expression(2, "*", 2, elems[1].get());
+    test_infix_expression(3, "+", 3, elems[2].get());
+}
+
 }

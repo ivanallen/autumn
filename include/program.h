@@ -315,9 +315,9 @@ public:
             }
             ret.append(_parameters[i]->to_string());
         }
-        ret.append(") {");
+        ret.append(") { ");
         ret.append(_body->to_string());
-        ret.append("}");
+        ret.append(" }");
         return ret;
     }
 private:
@@ -471,6 +471,37 @@ private:
     }
 private:
     std::unique_ptr<Expression> _expression;
+};
+
+class ArrayLiteral : public Expression {
+public:
+    friend class autumn::Parser;
+    using Expression::Expression;
+
+    const std::vector<std::unique_ptr<Expression>>& elements() const {
+        return _elements;
+    }
+
+    std::string to_string() const override {
+        std::string ret;
+
+        ret.append(1, '[');
+        for (size_t i = 0; i < _elements.size(); ++i) {
+            if (i != 0) {
+                ret.append(", ");
+            }
+            ret.append(_elements[i]->to_string());
+        }
+        ret.append(1, ']');
+        return ret;
+    }
+
+private:
+    void set_elements(std::vector<std::unique_ptr<Expression>>&& elements) {
+        _elements = std::move(elements);
+    }
+private:
+    std::vector<std::unique_ptr<Expression>> _elements;
 };
 
 class Program : public Node {

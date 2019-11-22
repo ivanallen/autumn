@@ -29,6 +29,8 @@ static std::map<Token::Type, std::string> s_token_type = {
     {Token::RPAREN, "RPAREN"},
     {Token::LBRACE, "LBRACE"},
     {Token::RBRACE, "RBRACE"},
+    {Token::LBRACKET, "LBRACKET"},
+    {Token::RBRACKET, "RBRACKET"},
     {Token::COMMA, "COMMA"},
     {Token::SEMICOLON, "SEMICOLON"},
     {Token::LET, "LET"},
