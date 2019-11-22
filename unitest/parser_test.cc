@@ -193,6 +193,25 @@ TEST(Parser, TestIntegerLiteralExpression) {
     EXPECT_EQ(123, int_literal->value());
 }
 
+TEST(Parser, TestStringLiteralExpression) {
+    // 类似于这各只有一个标志符的，也是表达式
+    std::string input = R"("hello world")";
+    Parser parser;
+
+    auto program = parser.parse(input);
+    ASSERT_TRUE(program != nullptr);
+    auto& statments = program->statments();
+    ASSERT_EQ(1u, statments.size());
+
+    auto stmt = statments[0]->cast<ExpressionStatment>();
+    ASSERT_TRUE(stmt != nullptr);
+    auto exp = stmt->expression();
+    ASSERT_TRUE(exp != nullptr);
+    auto str_literal = exp->cast<StringLiteral>();
+    ASSERT_TRUE(str_literal != nullptr);
+    EXPECT_STREQ("hello world", str_literal->value().c_str());
+}
+
 TEST(Parser, TestParsingPrefixExpression) {
     std::vector<std::tuple<std::string, std::string, std::any>> tests = {
         {"!5;", "!", 5},

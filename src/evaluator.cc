@@ -68,6 +68,9 @@ std::shared_ptr<object::Object> Evaluator::eval(
     } else if (typeid(*node) == typeid(ast::BooleanLiteral)) {
         auto n = node->cast<ast::BooleanLiteral>();
         return n->value() ? _true : _false;
+    } else if (typeid(*node) == typeid(ast::StringLiteral)) {
+        auto n = node->cast<ast::StringLiteral>();
+        return std::make_shared<object::String>(n->value());
     } else if (typeid(*node) == typeid(ast::PrefixExpression)) {
         auto n = node->cast<ast::PrefixExpression>();
         auto right = eval(n->right(), env);

@@ -25,6 +25,12 @@ void test_boolean_object(const Object* object, bool expect) {
     EXPECT_EQ(expect, result->value());
 }
 
+void test_string_object(const Object* object, const std::string& expect) {
+    auto result = object->cast<String>();
+    ASSERT_TRUE(result != nullptr);
+    EXPECT_EQ(expect, result->value());
+}
+
 void test_null_object(const Object* object) {
     EXPECT_EQ(typeid(*object), typeid(Null));
 }
@@ -269,6 +275,29 @@ TEST(Evaluator, TestClosures) {
     }
 
     test_integer_object(object.get(), 12);
+}
+
+TEST(Evaluator, TestStringExpression) {
+    std::vector<std::tuple<std::string, std::string>> tests = {
+        {R"("hello world")", "hello world"},
+        {R"("hello autumn")", "hello autumn"},
+    };
+
+    Evaluator evaluator;
+
+    for (auto& test : tests) {
+        auto& input = std::get<0>(test);
+        auto& expect = std::get<1>(test);
+
+        auto object = evaluator.eval(input);
+
+        if (object->type() == object::Type::ERROR_OBJECT) {
+            std::cout << object->inspect() << std::endl;
+            ASSERT_TRUE(false);
+        }
+
+        test_string_object(object.get(), expect);
+    }
 }
 
 }

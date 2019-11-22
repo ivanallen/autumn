@@ -40,6 +40,7 @@ static std::map<Token::Type, std::string> s_token_type = {
     {Token::IF, "IF"},
     {Token::ELSE, "ELSE"},
     {Token::RETURN, "RETURN"},
+    {Token::STRING, "STRING"},
     {Token::END, "END"},
 };
 

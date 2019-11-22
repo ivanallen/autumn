@@ -99,6 +99,25 @@ private:
     int _value;
 };
 
+class StringLiteral : public Expression {
+public:
+    StringLiteral (const Token& token) :
+            Expression(token),
+            _value(token.literal)  {
+    }
+
+    std::string to_string() const override {
+        return token_literal();
+    }
+
+    const std::string& value() const {
+        return _value;
+    }
+
+private:
+    std::string _value;
+};
+
 class BooleanLiteral : public Expression {
 public:
     BooleanLiteral (const Token& token) :

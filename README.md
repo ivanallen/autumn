@@ -70,6 +70,12 @@ $ ./autumn parser
 $ DEBUG_AUTUMN=1 ./autumn parser
 ```
 
+- eval mode
+
+```
+$ ./autumn eval
+```
+
 ## Contributor
 
 Allen.

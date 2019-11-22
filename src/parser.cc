@@ -25,6 +25,7 @@ Parser::Parser() {
     // 注册前缀解析函数
     _prefix_parse_funcs[Token::IDENT] = std::bind(&Parser::parse_identifier, this);
     _prefix_parse_funcs[Token::INT] = std::bind(&Parser::parse_integer_literal, this);
+    _prefix_parse_funcs[Token::STRING] = std::bind(&Parser::parse_string_literal, this);
     _prefix_parse_funcs[Token::TRUE] = std::bind(&Parser::parse_boolean_literal, this);
     _prefix_parse_funcs[Token::FALSE] = std::bind(&Parser::parse_boolean_literal, this);
     _prefix_parse_funcs[Token::FUNCTION] = std::bind(&Parser::parse_function_literal, this);
@@ -239,6 +240,11 @@ std::unique_ptr<ast::Expression> Parser::parse_identifier() {
 std::unique_ptr<ast::Expression> Parser::parse_integer_literal() {
     Defer defer(_tracer.trace(__FUNCTION__));
     return std::unique_ptr<ast::Expression>(new ast::IntegerLiteral(_current_token));
+}
+
+std::unique_ptr<ast::Expression> Parser::parse_string_literal() {
+    Defer defer(_tracer.trace(__FUNCTION__));
+    return std::unique_ptr<ast::Expression>(new ast::StringLiteral(_current_token));
 }
 
 std::unique_ptr<ast::Expression> Parser::parse_boolean_literal() {

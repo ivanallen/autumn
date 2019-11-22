@@ -51,6 +51,7 @@ private:
     // 注册函数
     std::unique_ptr<ast::Expression> parse_identifier();
     std::unique_ptr<ast::Expression> parse_integer_literal();
+    std::unique_ptr<ast::Expression> parse_string_literal();
     std::unique_ptr<ast::Expression> parse_boolean_literal();
     std::unique_ptr<ast::Expression> parse_function_literal();
     std::unique_ptr<ast::Expression> parse_group_expression();
