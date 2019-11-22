@@ -82,6 +82,8 @@ void eval_repl(const std::string& line) {
 
     if (typeid(*obj) == typeid(autumn::object::String)) {
         std::cout << "\x1b[32m";
+    } else if (typeid(*obj) == typeid(autumn::object::Function)) {
+        std::cout << "\x1b[36m";
     } else {
         std::cout << "\x1b[1;33m";
     }

@@ -25,6 +25,8 @@ struct Token {
         RPAREN,
         LBRACE,
         RBRACE,
+        LBRACKET,
+        RBRACKET,
         COMMA,
         SEMICOLON,
         LET,

@@ -33,6 +33,7 @@ Parser::Parser() {
     _prefix_parse_funcs[Token::BANG] = std::bind(&Parser::parse_prefix_expression, this);
     _prefix_parse_funcs[Token::MINUS] = std::bind(&Parser::parse_prefix_expression, this);
     _prefix_parse_funcs[Token::IF] = std::bind(&Parser::parse_if_expression, this);
+    _prefix_parse_funcs[Token::LBRACKET] = std::bind(&Parser::parse_array_literal, this);
 
     // 注册中缀解析函数
     _infix_parse_funcs[Token::PLUS] = std::bind(&Parser::parse_infix_expression, this, _1);
@@ -242,6 +243,14 @@ std::unique_ptr<ast::Expression> Parser::parse_integer_literal() {
     return std::unique_ptr<ast::Expression>(new ast::IntegerLiteral(_current_token));
 }
 
+std::unique_ptr<ast::Expression> Parser::parse_array_literal() {
+    Defer defer(_tracer.trace(__FUNCTION__));
+    std::unique_ptr<ast::ArrayLiteral> arr(new ast::ArrayLiteral(_current_token));
+    auto elems = parse_expression_list(Token::RBRACKET);
+    arr->set_elements(std::move(elems));
+    return arr;
+}
+
 std::unique_ptr<ast::Expression> Parser::parse_string_literal() {
     Defer defer(_tracer.trace(__FUNCTION__));
     return std::unique_ptr<ast::Expression>(new ast::StringLiteral(_current_token));
@@ -397,18 +406,18 @@ std::unique_ptr<ast::Expression> Parser::parse_call_expression(ast::Expression* 
     std::unique_ptr<ast::CallExpression> call_expression(
             new ast::CallExpression(_current_token));
 
-    auto args = parse_call_arguments();
+    auto args = parse_expression_list(Token::RPAREN);
     call_expression->set_arguments(std::move(args)); 
     call_expression->set_function(left);
 
     return call_expression;
 }
 
-std::vector<std::unique_ptr<ast::Expression>> Parser::parse_call_arguments() {
+std::vector<std::unique_ptr<ast::Expression>> Parser::parse_expression_list(Token::Type end) {
     Defer defer(_tracer.trace(__FUNCTION__));
     std::vector<std::unique_ptr<ast::Expression>> args;
 
-    if (peek_token_is(Token::RPAREN)) {
+    if (peek_token_is(end)) {
         next_token();
         return {};
     }
@@ -422,7 +431,7 @@ std::vector<std::unique_ptr<ast::Expression>> Parser::parse_call_arguments() {
         args.emplace_back(parse_expression(Precedence::LOWEST));
     }
 
-    if (!expect_peek(Token::RPAREN)) {
+    if (!expect_peek(end)) {
         return {};
     }
     return args;

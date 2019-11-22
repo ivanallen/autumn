@@ -48,6 +48,7 @@ class Object {
 public:
 
     Object(Type type) : _type(type) {}
+    virtual ~Object() {}
 
     const Type& type() const {
         return _type;
@@ -204,9 +205,9 @@ public:
             }
             ret.append(_parameters[i]->to_string());
         }
-        ret.append(") {");
+        ret.append(") { ");
         ret.append(_body->to_string());
-        ret.append("}");
+        ret.append(" }");
 
         return ret;
     }
