@@ -35,6 +35,12 @@ void test_null_object(const Object* object) {
     EXPECT_EQ(typeid(*object), typeid(Null));
 }
 
+void test_error_object(const Object* object, const std::string& expect) {
+    auto result = object->cast<Error>();
+    ASSERT_TRUE(result != nullptr);
+    EXPECT_EQ(expect, result->message());
+}
+
 TEST(Evaluator, TestEvalIntegerExpression) {
     std::vector<std::tuple<std::string, int>> tests = {
         {"5", 5},
@@ -297,6 +303,31 @@ TEST(Evaluator, TestStringExpression) {
         }
 
         test_string_object(object.get(), expect);
+    }
+}
+
+TEST(Evaluator, TestBuiltinFunctions) {
+    std::vector<std::tuple<std::string, std::any>> tests = {
+        {R"(len(""))", 0},
+        {R"(len("hello world"))", 11},
+        {R"(len(1))", "argument to `len` not supported, got INTEGER"},
+        {R"(len("one", "two"))", "wrong number of arguments. expected 1, got 2"},
+    };
+
+    Evaluator evaluator;
+
+    for (auto& test : tests) {
+        auto& input = std::get<0>(test);
+        auto& expect = std::get<1>(test);
+
+        evaluator.reset_env();
+        auto object = evaluator.eval(input);
+
+        if (expect.type() == typeid(int)) {
+            test_integer_object(object.get(), std::any_cast<int>(expect));
+        } else {
+            test_error_object(object.get(), std::any_cast<const char*>(expect));
+        }
     }
 }
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -12,13 +13,14 @@ namespace object {
 class Type {
 public:
     enum TypeValue {
-        INTEGER,
-        BOOLEAN,
-        STRING,
+        INTEGER_OBJECT,
+        BOOLEAN_OBJECT,
+        STRING_OBJECT,
         ERROR_OBJECT,
         NULL_OBJECT,
         RETURN_OBJECT,
         FUNCTION_OBJECT,
+        BUILTIN_OBJECT,
     };
 
     Type(TypeValue type) : _type(type) {
@@ -70,7 +72,7 @@ protected:
 class Integer : public Object {
 public:
     Integer(int value) :
-            Object(Type::INTEGER),
+            Object(Type::INTEGER_OBJECT),
             _value(value) {
     }
 
@@ -88,7 +90,7 @@ private:
 class Boolean : public Object {
 public:
     Boolean(bool value) :
-            Object(Type::BOOLEAN),
+            Object(Type::BOOLEAN_OBJECT),
             _value(value) {
     }
 
@@ -106,7 +108,7 @@ private:
 class String: public Object {
 public:
     String(const std::string& value) :
-            Object(Type::BOOLEAN),
+            Object(Type::STRING_OBJECT),
             _value(value) {
     }
 
@@ -216,6 +218,26 @@ private:
     std::vector<std::shared_ptr<ast::Identifier>> _parameters;
     std::shared_ptr<ast::BlockStatment> _body;
     mutable std::shared_ptr<Environment> _env;
+};
+
+using BuiltinFunction = std::function<std::shared_ptr<object::Object>(const std::vector<std::shared_ptr<object::Object>>&)>;
+
+class Builtin : public Object {
+public:
+    Builtin(const BuiltinFunction& fn) :
+        Object(Type::BUILTIN_OBJECT),
+        _fn(fn) {
+    }
+
+    std::string inspect() const override {
+        return "builtin function";
+    }
+
+    std::shared_ptr<object::Object> run(const std::vector<std::shared_ptr<object::Object>>& args) const {
+        return _fn(args);
+    }
+private:
+    BuiltinFunction _fn;
 };
 
 } // namespace object
