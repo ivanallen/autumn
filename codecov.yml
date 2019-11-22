@@ -12,7 +12,7 @@ coverage:
         changes: no
 ignore:
     - "repl"
-    - "googtest"
+    - "googletest"
 
 parsers:
     gcov:
