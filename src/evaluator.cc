@@ -111,7 +111,7 @@ std::shared_ptr<object::Object> Evaluator::eval(
         return apply_function(function.get(), args);
     }
 
-    return _null;
+    return nullptr;
 }
 
 
@@ -170,6 +170,10 @@ std::shared_ptr<object::Object> Evaluator::eval_program(
 
     for (auto& stat : statments) {
         result = eval(stat.get(), env);
+        if (result == nullptr) {
+            continue;
+        }
+
         if (typeid(*result) == typeid(object::ReturnValue)) {
             return result->cast<object::ReturnValue>()->value();
         } else if (typeid(*result) == typeid(object::Error)) {

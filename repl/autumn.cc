@@ -76,6 +76,9 @@ void parser_repl(const std::string& line) {
 
 void eval_repl(const std::string& line) {
     auto obj = evaluator.eval(line);
+    if (obj == nullptr) {
+        return;
+    }
 
     if (typeid(*obj) == typeid(autumn::object::String)) {
         std::cout << "\x1b[32m";
