@@ -11,7 +11,8 @@ coverage:
         patch: yes
         changes: no
 ignore:
-    - "repl/autumn.cc"
+    - "repl"
+    - "googtest"
 
 parsers:
     gcov:
