@@ -5,13 +5,14 @@ namespace autumn {
 namespace object {
 
 std::unordered_map<int, std::string> Type::_type_to_name = {
-    {INTEGER, "INTEGER"},
-    {BOOLEAN, "BOOLEAN"},
-    {STRING, "STRING"},
-    {ERROR_OBJECT, "ERROR_OBJECT"},
-    {NULL_OBJECT, "NULL_OBJECT"},
-    {RETURN_OBJECT, "RETURN_OBJECT"},
-    {FUNCTION_OBJECT, "FUNCTION_OBJECT"},
+    {INTEGER_OBJECT, "INTEGER"},
+    {BOOLEAN_OBJECT, "BOOLEAN"},
+    {STRING_OBJECT, "STRING"},
+    {ERROR_OBJECT, "ERROR"},
+    {NULL_OBJECT, "NULL"},
+    {RETURN_OBJECT, "RETURN"},
+    {FUNCTION_OBJECT, "FUNCTION"},
+    {BUILTIN_OBJECT, "BUILTIN"},
 };
 
 std::ostream& operator<<(std::ostream& out, const Type& type) {

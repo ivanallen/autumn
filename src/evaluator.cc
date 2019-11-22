@@ -1,4 +1,5 @@
 #include "evaluator.h"
+#include "builtin.h"
 
 namespace autumn {
 
@@ -117,9 +118,18 @@ std::shared_ptr<object::Object> Evaluator::eval(
 std::shared_ptr<object::Object> Evaluator::apply_function(
         const object::Object* fn,
         std::vector<std::shared_ptr<object::Object>>& args) const {
-    auto function = fn->cast<object::Function>();
-    auto extended_env = extend_function_env(function, args);
-    auto val = eval(function->body(), extended_env);
+
+    std::shared_ptr<object::Object> val = _null;
+
+    if (typeid(*fn) == typeid(object::Function)) {
+        auto function = fn->cast<object::Function>();
+        auto extended_env = extend_function_env(function, args);
+        // 开始执行函数体内的语句
+        val = eval(function->body(), extended_env);
+    } else if (typeid(*fn) == typeid(object::Builtin)) {
+        auto builtin_fn = fn->cast<object::Builtin>();
+        val = builtin_fn->run(args);
+    }
 
     if (typeid(*val) == typeid(object::ReturnValue)) {
         return val->cast<object::ReturnValue>()->value();
@@ -173,10 +183,16 @@ std::shared_ptr<object::Object> Evaluator::eval_identifier(
         const ast::Identifier* identifier,
         std::shared_ptr<object::Environment>& env) const {
     auto val = env->get(identifier->value());
-    if (val == nullptr) {
-        return new_error("identifier not found: {}", identifier->value());
+    if (val != nullptr) {
+        return val;
     }
-    return val;
+
+    auto builtin_fn = builtin::BUILTINS.find(identifier->value());
+    if (builtin_fn != builtin::BUILTINS.end()) {
+        return std::make_shared<object::Builtin>(builtin_fn->second);
+    }
+
+    return new_error("identifier not found: {}", identifier->value());
 }
 
 std::shared_ptr<object::Object> Evaluator::eval_statments(
