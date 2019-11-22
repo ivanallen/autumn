@@ -36,6 +36,7 @@ struct Token {
         IF,
         ELSE,
         RETURN,
+        STRING,
         END,
     };
 

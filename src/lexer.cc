@@ -12,6 +12,12 @@ Token Lexer::next_token() {
     Token token;
 
     switch (_ch) {
+    case '"':
+        {
+            std::string s = read_string();
+            token = Token{Token::STRING, s};
+        }
+        break;
     case '=':
         if (peek_char() == '=') {
             read_char();
@@ -141,6 +147,14 @@ std::string Lexer::read_number() {
     while (is_digital(_ch)) {
         read_char();
     }
+    return _input.substr(pos, _pos - pos);
+}
+
+std::string Lexer::read_string() {
+    int pos = _pos + 1;
+    do {
+        read_char();
+    } while (_ch != '"');
     return _input.substr(pos, _pos - pos);
 }
 

@@ -106,6 +106,8 @@ TEST(Lexer, TestNontrivial) {
         10 == 10;
         10 != 9;
         3 <= 6 >= 3;
+        "foobar"
+        "foo bar"
     )";
 
     Token expect_tokens[] = {
@@ -189,6 +191,8 @@ TEST(Lexer, TestNontrivial) {
         {Token::GTE, ">="},
         {Token::INT, "3"},
         {Token::SEMICOLON, ";"},
+        {Token::STRING, "foobar"},
+        {Token::STRING, "foo bar"},
         {Token::END, ""},
     };
 

@@ -15,6 +15,7 @@ private:
     bool is_digital(char c) const;
     std::string read_identifier();
     std::string read_number();
+    std::string read_string();
     void skip_whitespace();
 private:
     std::string _input;

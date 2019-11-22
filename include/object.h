@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "program.h"
+#include "format.h"
 
 namespace autumn {
 namespace object {
@@ -13,6 +14,8 @@ public:
     enum TypeValue {
         INTEGER,
         BOOLEAN,
+        STRING,
+        ERROR_OBJECT,
         NULL_OBJECT,
         RETURN_OBJECT,
         FUNCTION_OBJECT,
@@ -23,6 +26,10 @@ public:
 
     TypeValue value() const {
         return _type;
+    }
+
+    bool operator==(TypeValue type) const {
+        return _type == type;
     }
 
     friend std::ostream& operator<<(
@@ -96,6 +103,24 @@ private:
     bool _value = 0;
 };
 
+class String: public Object {
+public:
+    String(const std::string& value) :
+            Object(Type::BOOLEAN),
+            _value(value) {
+    }
+
+    std::string inspect() const override {
+        return format(R"("{}")", _value) ;
+    }
+
+    const std::string& value() const {
+        return _value;
+    }
+private:
+    std::string _value;
+};
+
 class Null : public Object {
 public:
     Null() : Object(Type::NULL_OBJECT) {
@@ -127,7 +152,7 @@ private:
 class Error : public Object {
 public:
     Error(const std::string& message) :
-        Object(Type::RETURN_OBJECT),
+        Object(Type::ERROR_OBJECT),
         _message(message) {
     }
 
