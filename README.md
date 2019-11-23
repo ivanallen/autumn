@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.com/ivanallen/autumn.svg?branch=master)](https://travis-ci.com/ivanallen/autumn)
 [![codecov](https://codecov.io/gh/ivanallen/autumn/branch/master/graph/badge.svg)](https://codecov.io/gh/ivanallen/autumn)
+![license](https://img.shields.io/badge/license-BSD2-green)
 
 An easy interpreter to learn.
 
