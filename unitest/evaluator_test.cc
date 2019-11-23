@@ -356,4 +356,36 @@ TEST(Evaluator, TestArrayLiteral) {
     test_integer_object(array_obj->elements()[2].get(), 9);
 }
 
+TEST(Evaluator, TestIndexExpression) {
+    std::vector<std::tuple<std::string, std::any>> tests = {
+        {"[1, 2, 3][0]", 1},
+        {"[1, 2, 3][1]", 2},
+        {"[1, 2, 3][2]", 3},
+        {"let i = 0; [1][i];", 1},
+        {"[1, 2, 3][1 + 1];", 3},
+        {"let myArray = [1, 2, 3]; myArray[2];", 3},
+        {"let myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];", 6},
+        {"let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i]", 2},
+        {"[1, 2, 3][3]", nullptr},
+        {"[1, 2, 3][-1]", 3},
+    };
+
+    Evaluator evaluator;
+
+    for (auto& test : tests) {
+        auto& input = std::get<0>(test);
+        auto& expect = std::get<1>(test);
+
+        auto object = evaluator.eval(input);
+
+        if (expect.type() == typeid(int)) {
+            test_integer_object(object.get(), std::any_cast<int>(expect));
+        } else if (expect.type() == typeid(std::nullptr_t)) {
+            test_null_object(object.get());
+        } else {
+            std::cout << object->inspect() << std::endl;
+        }
+    }
+}
+
 }
