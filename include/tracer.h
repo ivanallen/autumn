@@ -5,10 +5,10 @@
 #include <functional>
 #include <string>
 
+#include "color.h"
+
 namespace autumn {
 
-// Tracer 和颜色耦合了？
-// TODO:
 class Tracer {
 public:
     Tracer() {
@@ -18,14 +18,26 @@ public:
         }
     }
 
-    std::function<void()> trace(const std::string& message) {
+    std::function<void()> trace(const std::string& message, const std::string& token_literal) {
         ++_level;
-        print(format("\x1b[2m{}\x1b[0m {}", "BEGIN", message));
-        return std::bind(&Tracer::untrace, this, message);
+        print(format("{}BEGIN{} {}: {}{}{}",
+                    color::dark::dark,
+                    color::off,
+                    message,
+                    color::dark::yellow,
+                    token_literal,
+                    color::off));
+        return std::bind(&Tracer::untrace, this, message, token_literal);
     }
 
-    void untrace(const std::string& message) {
-        print(format("\x1b[2m{}\x1b[0m {}", "END", message));
+    void untrace(const std::string& message, const std::string& token_literal) {
+        print(format("{}END{} {}: {}{}{}",
+                    color::dark::dark,
+                    color::off,
+                    message,
+                    color::dark::yellow,
+                    token_literal,
+                    color::off));
         --_level;
     }
 

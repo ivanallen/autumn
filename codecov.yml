@@ -18,6 +18,8 @@ coverage:
 ignore:
     - "repl"
     - "googletest"
+    - "include/color.h"
+    - "src/color.cc"
 
 parsers:
     gcov:
