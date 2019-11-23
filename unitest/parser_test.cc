@@ -313,6 +313,8 @@ TEST(Parser, TestOperatorPrecedenceParsing) {
         {"a + add(b * c) + d", "((a + add((b * c))) + d)"},
         {"add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))", "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))"},
         {"add(a + b + c * d / f + g)", "add((((a + b) + ((c * d) / f)) + g))"},
+        {"a * [1, 2, 3, 4][b * c] * d", "((a * ([1, 2, 3, 4][(b * c)])) * d)"},
+        {"add(a * b[2], b[1], 2 * [1, 2][1])", "add((a * (b[2])), (b[1]), (2 * ([1, 2][1])))"},
     };
 
     Parser parser;
@@ -550,6 +552,32 @@ TEST(Parser, TestParsingArrayLiteral) {
     test_literal(1, elems[0].get());
     test_infix_expression(2, "*", 2, elems[1].get());
     test_infix_expression(3, "+", 3, elems[2].get());
+}
+
+TEST(Parser, TestIndexExpression) {
+    std::string input = "arr[1 + 1]";
+
+    Parser parser;
+    auto program = parser.parse(input);
+    for (auto& error : parser.errors()) {
+        std::cout << error << std::endl;
+    }
+    ASSERT_TRUE(program != nullptr);
+
+    auto& statments = program->statments();
+    ASSERT_EQ(1u, statments.size());
+    auto stmt = statments[0]->cast<ExpressionStatment>();
+    ASSERT_TRUE(stmt != nullptr);
+    auto exp = stmt->expression();
+    ASSERT_TRUE(exp != nullptr);
+    auto idx_exp = exp->cast<IndexExpression>();
+    ASSERT_TRUE(idx_exp != nullptr);
+
+    auto index = idx_exp->index();
+    auto left = idx_exp->left();
+
+    test_infix_expression(1, "+", 1, index);
+    test_literal("arr", left);
 }
 
 }

@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "format.h"
 #include "token.h"
 
 namespace autumn {
@@ -502,6 +503,43 @@ private:
     }
 private:
     std::vector<std::unique_ptr<Expression>> _elements;
+};
+
+class IndexExpression : public Expression {
+public:
+    friend class autumn::Parser;
+    using Expression::Expression;
+
+    const Expression* left() const {
+        return _left.get();
+    }
+
+    const Expression* index() const {
+        return _index.get();
+    }
+
+    std::string to_string() const override {
+        std::string ret;
+
+        if (_left == nullptr || _index == nullptr) {
+            return ret;
+        }
+
+        ret = format("({}[{}])", _left->to_string(), _index->to_string());
+        return ret;
+    }
+
+private:
+    void set_index(Expression* index) {
+        _index.reset(index);
+    }
+
+    void set_left(Expression* left) {
+        _left.reset(left);
+    }
+private:
+    std::unique_ptr<Expression> _index;
+    std::unique_ptr<Expression> _left;
 };
 
 class Program : public Node {

@@ -1,5 +1,9 @@
-CXXFLAGS=-g -std=c++17 -Werror -fno-access-control -coverage -I../googletest/include -I../include
+CXXFLAGS=-g -std=c++17 -Werror -fno-access-control -I../googletest/include -I../include
 LDFLAGS=-L../googletest/lib -L../lib -lgtest -lpthread -lautumn -lgcov
+
+ifdef CODECOV
+	CXXFLAGS += -coverage
+endif
 
 DEPS=../lib/libautumn.a
 

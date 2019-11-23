@@ -7,9 +7,14 @@ coverage:
     range: "70...100"
 
     status:
-        project: yes
-        patch: yes
-        changes: no
+        project:
+            default:
+                target: 70%
+                threshdold: 10%
+        patch:
+            default:
+                target: 70%
+                threshdold: 10%
 ignore:
     - "repl"
     - "googletest"

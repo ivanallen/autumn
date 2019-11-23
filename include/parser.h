@@ -23,6 +23,7 @@ public:
         PRODUCT, // *
         PREFIX, // -x or !x
         CALL, // fn(x)
+        INDEX, // array[index]
     };
 public:
     Parser();
@@ -60,6 +61,7 @@ private:
     std::unique_ptr<ast::Expression> parse_if_expression();
     std::unique_ptr<ast::Expression> parse_infix_expression(ast::Expression* left);
     std::unique_ptr<ast::Expression> parse_call_expression(ast::Expression* left);
+    std::unique_ptr<ast::Expression> parse_index_expression(ast::Expression* left);
 private:
     using PrefixParseFunc = std::function<std::unique_ptr<ast::Expression>()>;
     using InfixParseFunc = std::function<std::unique_ptr<ast::Expression>(ast::Expression* expression)>;

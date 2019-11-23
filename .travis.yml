@@ -16,6 +16,7 @@ matrix:
         - export CXX="g++-8"
         - export CC="gcc-8"
         - sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-8 90
+        - export CODECOV=1
       script:
         - make
         - sh ./get_code_cov
