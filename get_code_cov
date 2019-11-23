@@ -3,6 +3,3 @@ for filename in `find ./src | egrep '\.cc'`;
 do 
   gcov -n -o ./objs $filename >/dev/null; 
 done
-
-mv ./objs/*.gcda ./src
-mv ./objs/*.gcno ./src

@@ -7,6 +7,8 @@
 
 namespace autumn {
 
+// Tracer 和颜色耦合了？
+// TODO:
 class Tracer {
 public:
     Tracer() {
@@ -18,12 +20,12 @@ public:
 
     std::function<void()> trace(const std::string& message) {
         ++_level;
-        print("BEGIN " + message);
+        print(format("\x1b[2m{}\x1b[0m {}", "BEGIN", message));
         return std::bind(&Tracer::untrace, this, message);
     }
 
     void untrace(const std::string& message) {
-        print("END " + message);
+        print(format("\x1b[2m{}\x1b[0m {}", "END", message));
         --_level;
     }
 
@@ -33,12 +35,11 @@ public:
 private:
     void print(const std::string& message) {
         if (_debug_env) {
-            std::cout << "\x1b[2m";
             if (_level > 1) {
                 std::string ident(4*(_level - 1), ' ');
                 std::cout << ident << ' ';
             }
-            std::cout << message << "\x1b[0m" << std::endl;
+            std::cout << message << std::endl;
         }
     }
 private:

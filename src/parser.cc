@@ -16,6 +16,7 @@ const std::unordered_map<Token::Type, Parser::Precedence> PRECEDENCES = {
     {Token::SLASH, Parser::Precedence::PRODUCT},
     {Token::ASTERISK, Parser::Precedence::PRODUCT},
     {Token::LPAREN, Parser::Precedence::CALL},
+    {Token::LBRACKET, Parser::Precedence::INDEX},
 };
 
 }
@@ -46,6 +47,7 @@ Parser::Parser() {
     _infix_parse_funcs[Token::GT] = std::bind(&Parser::parse_infix_expression, this, _1);
     // 在 call 表达式中，形如 add(1, 2 * 3)，我们把 ( 看作是中缀操作符，且它有最高的优先级
     _infix_parse_funcs[Token::LPAREN] = std::bind(&Parser::parse_call_expression, this, _1);
+    _infix_parse_funcs[Token::LBRACKET] = std::bind(&Parser::parse_index_expression, this, _1);
 }
 
 const std::vector<std::string>& Parser::errors() const {
@@ -144,7 +146,7 @@ std::unique_ptr<ast::Statment> Parser::parse_statment() {
 }
 
 std::unique_ptr<ast::Statment> Parser::parse_let_statment() {
-    Defer defer(_tracer.trace(__FUNCTION__));
+    Defer defer(_tracer.trace(format("\x1b[2m{}:\x1b[0m \x1b[2;33m{}\x1b[0m", __FUNCTION__, _current_token.literal)));
     std::unique_ptr<ast::LetStatment> stmt(new ast::LetStatment(_current_token));
 
     // 查看下一个 token，并取出
@@ -173,7 +175,7 @@ std::unique_ptr<ast::Statment> Parser::parse_let_statment() {
 }
 
 std::unique_ptr<ast::Statment> Parser::parse_return_statment() {
-    Defer defer(_tracer.trace(__FUNCTION__));
+    Defer defer(_tracer.trace(format("\x1b[2m{}:\x1b[0m \x1b[2;33m{}\x1b[0m", __FUNCTION__, _current_token.literal)));
     std::unique_ptr<ast::ReturnStatment> stmt(new ast::ReturnStatment(_current_token));
 
     next_token();
@@ -189,7 +191,7 @@ std::unique_ptr<ast::Statment> Parser::parse_return_statment() {
 }
 
 std::unique_ptr<ast::Statment> Parser::parse_expression_statment() {
-    Defer defer(_tracer.trace(__FUNCTION__));
+    Defer defer(_tracer.trace(format("\x1b[2m{}:\x1b[0m \x1b[2;33m{}\x1b[0m", __FUNCTION__, _current_token.literal)));
     std::unique_ptr<ast::ExpressionStatment> stmt(new ast::ExpressionStatment(_current_token));
 
     auto expression = parse_expression(Precedence::LOWEST);
@@ -202,7 +204,7 @@ std::unique_ptr<ast::Statment> Parser::parse_expression_statment() {
 }
 
 std::unique_ptr<ast::Expression> Parser::parse_expression(Precedence precedence) {
-    Defer defer(_tracer.trace(__FUNCTION__));
+    Defer defer(_tracer.trace(format("\x1b[2m{}:\x1b[0m \x1b[2;33m{}\x1b[0m", __FUNCTION__, _current_token.literal)));
     auto prefix = _prefix_parse_funcs.find(_current_token.type);
     if (prefix == _prefix_parse_funcs.end()) {
         _errors.push_back("no prefix parse function found for `" + _current_token.literal + "`");
@@ -231,7 +233,7 @@ std::unique_ptr<ast::Expression> Parser::parse_expression(Precedence precedence)
 }
 
 std::unique_ptr<ast::Expression> Parser::parse_identifier() {
-    Defer defer(_tracer.trace(__FUNCTION__));
+    Defer defer(_tracer.trace(format("\x1b[2m{}:\x1b[0m \x1b[2;33m{}\x1b[0m", __FUNCTION__, _current_token.literal)));
     return std::unique_ptr<ast::Expression>(new ast::Identifier(
         _current_token,
         _current_token.literal
@@ -239,12 +241,12 @@ std::unique_ptr<ast::Expression> Parser::parse_identifier() {
 }
 
 std::unique_ptr<ast::Expression> Parser::parse_integer_literal() {
-    Defer defer(_tracer.trace(__FUNCTION__));
+    Defer defer(_tracer.trace(format("\x1b[2m{}:\x1b[0m \x1b[2;33m{}\x1b[0m", __FUNCTION__, _current_token.literal)));
     return std::unique_ptr<ast::Expression>(new ast::IntegerLiteral(_current_token));
 }
 
 std::unique_ptr<ast::Expression> Parser::parse_array_literal() {
-    Defer defer(_tracer.trace(__FUNCTION__));
+    Defer defer(_tracer.trace(format("\x1b[2m{}:\x1b[0m \x1b[2;33m{}\x1b[0m", __FUNCTION__, _current_token.literal)));
     std::unique_ptr<ast::ArrayLiteral> arr(new ast::ArrayLiteral(_current_token));
     auto elems = parse_expression_list(Token::RBRACKET);
     arr->set_elements(std::move(elems));
@@ -252,17 +254,17 @@ std::unique_ptr<ast::Expression> Parser::parse_array_literal() {
 }
 
 std::unique_ptr<ast::Expression> Parser::parse_string_literal() {
-    Defer defer(_tracer.trace(__FUNCTION__));
+    Defer defer(_tracer.trace(format("\x1b[2m{}:\x1b[0m \x1b[2;33m{}\x1b[0m", __FUNCTION__, _current_token.literal)));
     return std::unique_ptr<ast::Expression>(new ast::StringLiteral(_current_token));
 }
 
 std::unique_ptr<ast::Expression> Parser::parse_boolean_literal() {
-    Defer defer(_tracer.trace(__FUNCTION__));
+    Defer defer(_tracer.trace(format("\x1b[2m{}:\x1b[0m \x1b[2;33m{}\x1b[0m", __FUNCTION__, _current_token.literal)));
     return std::unique_ptr<ast::Expression>(new ast::BooleanLiteral(_current_token));
 }
 
 std::vector<std::shared_ptr<ast::Identifier>> Parser::parse_function_parameters() {
-    Defer defer(_tracer.trace(__FUNCTION__));
+    Defer defer(_tracer.trace(format("\x1b[2m{}:\x1b[0m \x1b[2;33m{}\x1b[0m", __FUNCTION__, _current_token.literal)));
     std::vector<std::shared_ptr<ast::Identifier>> idents;
     if (peek_token_is(Token::RPAREN)) {
         next_token();
@@ -286,7 +288,7 @@ std::vector<std::shared_ptr<ast::Identifier>> Parser::parse_function_parameters(
 }
 
 std::unique_ptr<ast::Expression> Parser::parse_function_literal() {
-    Defer defer(_tracer.trace(__FUNCTION__));
+    Defer defer(_tracer.trace(format("\x1b[2m{}:\x1b[0m \x1b[2;33m{}\x1b[0m", __FUNCTION__, _current_token.literal)));
     std::unique_ptr<ast::FunctionLiteral> function_literal(new ast::FunctionLiteral(_current_token));
 
     if (!expect_peek(Token::LPAREN)) {
@@ -306,7 +308,7 @@ std::unique_ptr<ast::Expression> Parser::parse_function_literal() {
 }
 
 std::unique_ptr<ast::Expression> Parser::parse_group_expression() {
-    Defer defer(_tracer.trace(__FUNCTION__));
+    Defer defer(_tracer.trace(format("\x1b[2m{}:\x1b[0m \x1b[2;33m{}\x1b[0m", __FUNCTION__, _current_token.literal)));
     next_token();
     auto exp = parse_expression(Precedence::LOWEST);
     if (!expect_peek(Token::RPAREN)) {
@@ -326,7 +328,7 @@ std::unique_ptr<ast::Expression> Parser::parse_prefix_expression() {
 }
 
 std::unique_ptr<ast::Expression> Parser::parse_if_expression() {
-    Defer defer(_tracer.trace(__FUNCTION__));
+    Defer defer(_tracer.trace(format("\x1b[2m{}:\x1b[0m \x1b[2;33m{}\x1b[0m", __FUNCTION__, _current_token.literal)));
     std::unique_ptr<ast::IfExpression> if_expression(
             new ast::IfExpression(_current_token));
 
@@ -364,7 +366,7 @@ std::unique_ptr<ast::Expression> Parser::parse_if_expression() {
 }
 
 std::unique_ptr<ast::BlockStatment> Parser::parse_block_statment() {
-    Defer defer(_tracer.trace(__FUNCTION__));
+    Defer defer(_tracer.trace(format("\x1b[2m{}:\x1b[0m \x1b[2;33m{}\x1b[0m", __FUNCTION__, _current_token.literal)));
     std::unique_ptr<ast::BlockStatment> block_statment(
             new ast::BlockStatment(_current_token));
 
@@ -387,7 +389,7 @@ std::unique_ptr<ast::BlockStatment> Parser::parse_block_statment() {
 }
 
 std::unique_ptr<ast::Expression> Parser::parse_infix_expression(ast::Expression* left) {
-    Defer defer(_tracer.trace(__FUNCTION__));
+    Defer defer(_tracer.trace(format("\x1b[2m{}:\x1b[0m \x1b[2;33m{}\x1b[0m", __FUNCTION__, _current_token.literal)));
     std::unique_ptr<ast::InfixExpression> infix_expression(
             new ast::InfixExpression(_current_token));
 
@@ -402,7 +404,7 @@ std::unique_ptr<ast::Expression> Parser::parse_infix_expression(ast::Expression*
 }
 
 std::unique_ptr<ast::Expression> Parser::parse_call_expression(ast::Expression* left) {
-    Defer defer(_tracer.trace(__FUNCTION__));
+    Defer defer(_tracer.trace(format("\x1b[2m{}:\x1b[0m \x1b[2;33m{}\x1b[0m", __FUNCTION__, _current_token.literal)));
     std::unique_ptr<ast::CallExpression> call_expression(
             new ast::CallExpression(_current_token));
 
@@ -413,8 +415,25 @@ std::unique_ptr<ast::Expression> Parser::parse_call_expression(ast::Expression* 
     return call_expression;
 }
 
+std::unique_ptr<ast::Expression> Parser::parse_index_expression(ast::Expression* left) {
+    Defer defer(_tracer.trace(format("\x1b[2m{}:\x1b[0m \x1b[2;33m{}\x1b[0m", __FUNCTION__, _current_token.literal)));
+    std::unique_ptr<ast::IndexExpression> index_expression(
+            new ast::IndexExpression(_current_token));
+
+    next_token();
+    auto exp = parse_expression(Precedence::LOWEST);
+    index_expression->set_left(left);
+    index_expression->set_index(exp.release());
+
+    if (!expect_peek(Token::RBRACKET)) {
+        return nullptr;
+    }
+
+    return index_expression;
+}
+
 std::vector<std::unique_ptr<ast::Expression>> Parser::parse_expression_list(Token::Type end) {
-    Defer defer(_tracer.trace(__FUNCTION__));
+    Defer defer(_tracer.trace(format("\x1b[2m{}:\x1b[0m \x1b[2;33m{}\x1b[0m", __FUNCTION__, _current_token.literal)));
     std::vector<std::unique_ptr<ast::Expression>> args;
 
     if (peek_token_is(end)) {

@@ -1,11 +1,15 @@
-CXXFLAGS=-g -std=c++17 -Werror -coverage -I./include
+CXXFLAGS=-g -std=c++17 -Werror -I./include
 LDFLAGS=
+
+ifdef CODECOV
+	CXXFLAGS += -coverage
+endif
 
 SRC=$(notdir $(wildcard src/*.cc))
 OBJ=$(patsubst %.cc,objs/%.o,$(SRC))
 HEADERS=$(wildcard include/*.h)
 
-all:prepare-dep libautumn googletest unitest autumn
+all:prepare-dep libautumn autumn googletest unitest
 
 prepare-dep:
 	@mkdir -p objs
