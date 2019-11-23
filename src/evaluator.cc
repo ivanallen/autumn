@@ -175,7 +175,10 @@ std::shared_ptr<object::Object> Evaluator::eval_index_expression(
 
         return elems[idx];
     }
-    return new_error("index operator not supported: `{}`", array->type());
+    return new_error("index operator not supported: {}`{}`{}",
+            color::light::light,
+            array->type(),
+            color::off);
 }
 
 std::shared_ptr<object::Object> Evaluator::apply_function(
@@ -259,7 +262,10 @@ std::shared_ptr<object::Object> Evaluator::eval_identifier(
         return std::make_shared<object::Builtin>(builtin_fn->second);
     }
 
-    return new_error("identifier not found: {}", identifier->value());
+    return new_error("identifier not found: {}`{}`{}",
+            color::light::light,
+            identifier->value(),
+            color::off);
 }
 
 std::shared_ptr<object::Object> Evaluator::eval_statments(
@@ -287,7 +293,11 @@ std::shared_ptr<object::Object> Evaluator::eval_prefix_expression(
         return eval_minus_prefix_operator_expression(right);
     }
 
-    return new_error("unknown operator: {}{}", op, right->type());
+    return new_error("unknown operator: {}`{}{}`{}",
+            color::light::light,
+            op,
+            right->type(),
+            color::off);
 }
 
 std::shared_ptr<object::Object> Evaluator::eval_bang_operator_expression(const object::Object* right) const {
@@ -303,7 +313,10 @@ std::shared_ptr<object::Object> Evaluator::eval_bang_operator_expression(const o
 
 std::shared_ptr<object::Object> Evaluator::eval_minus_prefix_operator_expression(const object::Object* right) const {
     if (typeid(*right) != typeid(object::Integer)) {
-        return new_error("unknown operator: -{}", right->type());
+        return new_error("unknown operator: {}`-{}`{}",
+                color::light::light,
+                right->type(),
+                color::off);
     }
 
     auto result = right->cast<object::Integer>();
@@ -341,7 +354,10 @@ std::shared_ptr<object::Object> Evaluator::eval_integer_infix_expression(
         return native_bool_to_boolean_object(left_val->value() != right_val->value());
     }
 
-    return new_error("unknown operator: {} {} {}", left->type(), op, right->type());
+    return new_error("unknown operator: {}`{} {} {}`{}",
+            color::light::light,
+            left->type(), op, right->type(),
+            color::off);
 }
 
 std::shared_ptr<object::Object> Evaluator::eval_string_infix_expression(
@@ -356,7 +372,10 @@ std::shared_ptr<object::Object> Evaluator::eval_string_infix_expression(
         return std::make_shared<object::String>(left_val->value() + right_val->value());
     }
 
-    return new_error("unknown operator: {} {} {}", left->type(), op, right->type());
+    return new_error("unknown operator: {}`{} {} {}`{}",
+            color::light::light,
+            left->type(), op, right->type(),
+            color::off);
 }
 
 std::shared_ptr<object::Object> Evaluator::eval_infix_expression(
@@ -375,7 +394,10 @@ std::shared_ptr<object::Object> Evaluator::eval_infix_expression(
             && typeid(*right) == typeid(object::String)) {
         return eval_string_infix_expression(op, left, right, env);
     } else if (typeid(*left) != typeid(*right)) {
-        return new_error("type mismatch: {} {} {}", left->type(), op, right->type());
+        return new_error("type mismatch: {}`{} {} {}`{}",
+                color::light::light,
+                left->type(), op, right->type(),
+                color::off);
     } else if (op == "==") {
         // 非整数类型，直接比较对象指针
         // 如果是 Boolean 类型，因为全局都是用的同一份，所以指针相同
@@ -383,7 +405,10 @@ std::shared_ptr<object::Object> Evaluator::eval_infix_expression(
     } else if (op == "!=") {
         return native_bool_to_boolean_object(left != right);
     }
-    return new_error("unknown operator: {} {} {}", left->type(), op, right->type());
+    return new_error("unknown operator: {}`{} {} {}`{}",
+            color::light::light,
+            left->type(), op, right->type(),
+            color::off);
 }
 
 bool Evaluator::is_truthy(const object::Object* obj) const {

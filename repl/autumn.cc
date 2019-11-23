@@ -3,6 +3,7 @@
 #include <map>
 #include <stdio.h>
 
+#include "color.h"
 #include "lexer.h"
 #include "parser.h"
 #include "evaluator.h"
@@ -66,7 +67,8 @@ void parser_repl(const std::string& line) {
     auto program = parser.parse(line);
     if (!parser.errors().empty()) {
         for (auto& error : parser.errors()) {
-            std::cerr << "\x1b[1;31merror: \x1b[0m"
+            std::cerr << autumn::color::light::red
+                << "error: " << autumn::color::off
                 << error << std::endl;
         }
         return;
@@ -80,15 +82,8 @@ void eval_repl(const std::string& line) {
         return;
     }
 
-    if (typeid(*obj) == typeid(autumn::object::String)) {
-        std::cout << "\x1b[32m";
-    } else if (typeid(*obj) == typeid(autumn::object::Function)) {
-        std::cout << "\x1b[36m";
-    } else {
-        std::cout << "\x1b[1;33m";
-    }
     std::cout << obj->inspect();
-    std::cout << "\x1b[0m" << std::endl;
+    std::cout << autumn::color::off << std::endl;
 }
 
 void do_nothing(const std::string& line) {

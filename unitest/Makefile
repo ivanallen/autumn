@@ -1,8 +1,9 @@
 CXXFLAGS=-g -std=c++17 -Werror -fno-access-control -I../googletest/include -I../include
-LDFLAGS=-L../googletest/lib -L../lib -lgtest -lpthread -lautumn -lgcov
+LDFLAGS=-L../googletest/lib -L../lib -lgtest -lpthread -lautumn
 
 ifdef CODECOV
 	CXXFLAGS += -coverage
+	LDFLAGS += -lgcov
 endif
 
 DEPS=../lib/libautumn.a
@@ -12,7 +13,7 @@ all:prepare-dep test
 prepare-dep:$(DEPS)
 
 test:format_test lexer_test parser_test evaluator_test
-	@for bin in $^; do ./$$bin; done
+	@for bin in $^; do AUTUMN_COLOR_OFF=1 ./$$bin; done
 
 format_test:format_test.o $(DEPS)
 	$(CXX) -o $@ $< $(LDFLAGS)

@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "color.h"
 #include "program.h"
 #include "format.h"
 
@@ -79,7 +80,8 @@ public:
     }
 
     std::string inspect() const override {
-        return std::to_string(_value);
+        std::string ret = std::to_string(_value);
+        return color::light::yellow + ret + color::off;
     }
 
     int value() const {
@@ -97,7 +99,8 @@ public:
     }
 
     std::string inspect() const override {
-        return _value ? "true" : "false";
+        std::string ret = _value ? "true" : "false";
+        return color::light::yellow + ret + color::off;
     }
 
     bool value() const {
@@ -115,7 +118,10 @@ public:
     }
 
     std::string inspect() const override {
-        return format(R"("{}")", _value) ;
+        return format(R"("{}{}{}")",
+                color::green,
+                _value,
+                color::off) ;
     }
 
     const std::string& value() const {
@@ -131,7 +137,7 @@ public:
     }
 
     std::string inspect() const override {
-        return "null";
+        return color::light::light + "null" + color::off;
     }
 };
 
@@ -161,7 +167,10 @@ public:
     }
 
     std::string inspect() const override {
-        return "\x1b[1;31merror: \x1b[0m" + _message;
+        return format("{}error:{}",
+                color::light::red,
+                color::off,
+                _message);
     }
 
     const std::string& message() const {
@@ -210,7 +219,7 @@ public:
         ret.append(_body->to_string());
         ret.append(" }");
 
-        return ret;
+        return color::cyan + ret + color::off;
     }
 
     std::shared_ptr<Environment>& env() const {
@@ -232,7 +241,7 @@ public:
     }
 
     std::string inspect() const override {
-        return "builtin function";
+        return color::cyan + "builtin function" + color::off;
     }
 
     std::shared_ptr<object::Object> run(const std::vector<std::shared_ptr<object::Object>>& args) const {
