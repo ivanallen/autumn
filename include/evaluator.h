@@ -59,6 +59,9 @@ private:
     std::shared_ptr<object::Environment> extend_function_env(
             const object::Function* fn,
             std::vector<std::shared_ptr<object::Object>>& args) const;
+    std::shared_ptr<object::Object> eval_index_expression(
+            const object::Object* array,
+            const object::Object* index) const;
 private:
     bool is_truthy(const object::Object* obj) const;
 

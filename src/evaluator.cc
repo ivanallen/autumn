@@ -41,12 +41,15 @@ std::shared_ptr<object::Object> Evaluator::eval(
     if (typeid(*node) == typeid(ast::Program)) {
         auto n = node->cast<ast::Program>();
         return eval_program(n->statments(), env);
+
     } else if (typeid(*node) == typeid(ast::ExpressionStatment)) {
         auto n = node->cast<ast::ExpressionStatment>();
         return eval(n->expression(), env);
+
     } else if (typeid(*node) == typeid(ast::BlockStatment)) {
         auto n = node->cast<ast::BlockStatment>();
         return eval_statments(n->statments(), env);
+
     } else if (typeid(*node) == typeid(ast::ReturnStatment)) {
         auto n = node->cast<ast::ReturnStatment>();
         auto return_val = eval(n->expression(), env);
@@ -54,6 +57,7 @@ std::shared_ptr<object::Object> Evaluator::eval(
             return return_val;
         }
         return std::make_shared<object::ReturnValue>(return_val);
+
     } else if (typeid(*node) == typeid(ast::LetStatment)) {
         auto n = node->cast<ast::LetStatment>();
         auto val = eval(n->expression(), env);
@@ -62,16 +66,20 @@ std::shared_ptr<object::Object> Evaluator::eval(
         }
 
         env->set(n->identifier()->value(), val);
+
     } else if (typeid(*node) == typeid(ast::IntegerLiteral)) {
         auto n = node->cast<ast::IntegerLiteral>();
         return std::shared_ptr<object::Integer>(
                 new object::Integer(n->value()));
+
     } else if (typeid(*node) == typeid(ast::BooleanLiteral)) {
         auto n = node->cast<ast::BooleanLiteral>();
         return n->value() ? _true : _false;
+
     } else if (typeid(*node) == typeid(ast::StringLiteral)) {
         auto n = node->cast<ast::StringLiteral>();
         return std::make_shared<object::String>(n->value());
+
     } else if (typeid(*node) == typeid(ast::ArrayLiteral)) {
         auto n = node->cast<ast::ArrayLiteral>();
         auto elems = eval_expressions(n->elements(), env);
@@ -79,6 +87,7 @@ std::shared_ptr<object::Object> Evaluator::eval(
             return elems[0];
         }
         return std::make_shared<object::Array>(elems);
+
     } else if (typeid(*node) == typeid(ast::PrefixExpression)) {
         auto n = node->cast<ast::PrefixExpression>();
         auto right = eval(n->right(), env);
@@ -86,41 +95,88 @@ std::shared_ptr<object::Object> Evaluator::eval(
             return right;
         }
         return eval_prefix_expression(n->op(), right.get(), env);
+
     } else if (typeid(*node) == typeid(ast::InfixExpression)) {
         auto n = node->cast<ast::InfixExpression>();
         auto left = eval(n->left(), env);
         if (is_error(left.get())) {
             return left;
         }
+
         auto right = eval(n->right(), env);
         if (is_error(right.get())) {
             return right;
         }
+
         return eval_infix_expression(n->op(), left.get(), right.get(), env);
+
     } else if (typeid(*node) == typeid(ast::IfExpression)) {
         return eval_if_expression(node->cast<ast::IfExpression>(), env);
+
     } else if (typeid(*node) == typeid(ast::Identifier)) {
         return eval_identifier(node->cast<ast::Identifier>(), env);
+
     } else if (typeid(*node) == typeid(ast::FunctionLiteral)) {
         auto n = node->cast<ast::FunctionLiteral>();
         return std::make_shared<object::Function>(
                 n->parameters(), n->body(), env);
+
     } else if (typeid(*node) == typeid(ast::CallExpression)) {
         auto n = node->cast<ast::CallExpression>();
         auto function = eval(n->function(), env);
         if (is_error(function.get())) {
             return function;
         }
+
         auto args = eval_expressions(n->arguments(), env);
         if (!args.empty() && is_error(args[0].get())) {
             return args[0];
         }
+
         return apply_function(function.get(), args);
+
+    } else if (typeid(*node) == typeid(ast::IndexExpression)) {
+        auto n = node->cast<ast::IndexExpression>();
+        auto array = eval(n->left(), env);
+        if (is_error(array.get())) {
+            return array;
+        }
+
+        auto index = eval(n->index(), env);
+        if (is_error(index.get())) {
+            return index;
+        }
+
+        return eval_index_expression(array.get(), index.get());
+
     }
 
     return nullptr;
 }
 
+std::shared_ptr<object::Object> Evaluator::eval_index_expression(
+        const object::Object* array,
+        const object::Object* index) const {
+    if (typeid(*array) == typeid(object::Array)
+            && typeid(*index) == typeid(object::Integer)) {
+        auto a = array->cast<object::Array>();
+        auto i = index->cast<object::Integer>();
+
+        auto& elems = a->elements();
+        auto idx = i->value();
+
+        if (idx < 0) {
+            idx += elems.size();
+        }
+
+        if (idx < 0 || idx >= elems.size()) {
+            return _null;
+        }
+
+        return elems[idx];
+    }
+    return new_error("index operator not supported: `{}`", array->type());
+}
 
 std::shared_ptr<object::Object> Evaluator::apply_function(
         const object::Object* fn,
