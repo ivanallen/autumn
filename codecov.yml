@@ -13,7 +13,7 @@ coverage:
                 threshdold: 10%
         patch:
             default:
-                target: 70%
+                target: 50%
                 threshdold: 10%
 ignore:
     - "repl"

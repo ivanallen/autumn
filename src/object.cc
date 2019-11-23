@@ -13,6 +13,7 @@ std::unordered_map<int, std::string> Type::_type_to_name = {
     {RETURN_OBJECT, "RETURN"},
     {FUNCTION_OBJECT, "FUNCTION"},
     {BUILTIN_OBJECT, "BUILTIN"},
+    {ARRAY_OBJECT, "ARRAY"},
 };
 
 std::ostream& operator<<(std::ostream& out, const Type& type) {

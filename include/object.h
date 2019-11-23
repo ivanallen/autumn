@@ -21,6 +21,7 @@ public:
         RETURN_OBJECT,
         FUNCTION_OBJECT,
         BUILTIN_OBJECT,
+        ARRAY_OBJECT,
     };
 
     Type(TypeValue type) : _type(type) {
@@ -239,6 +240,33 @@ public:
     }
 private:
     BuiltinFunction _fn;
+};
+
+class Array : public Object {
+public:
+    Array(const std::vector<std::shared_ptr<object::Object>>& elements) :
+        Object(Type::ARRAY_OBJECT),
+        _elements(elements) {
+    }
+
+    std::string inspect() const override {
+        std::string ret;
+        ret.append(1, '[');
+        for (size_t i = 0; i < _elements.size(); ++i) {
+            if (i != 0) {
+                ret.append(", ");
+            }
+            ret.append(_elements[i]->inspect());
+        }
+        ret.append(1, ']');
+        return ret;
+    }
+
+    const std::vector<std::shared_ptr<object::Object>>& elements() const {
+        return _elements;
+    }
+private:
+    std::vector<std::shared_ptr<object::Object>> _elements;
 };
 
 } // namespace object
