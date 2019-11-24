@@ -8,3 +8,4 @@
 libautumn.a
 libgtest.a
 autumn
+*.dSYM

@@ -4,7 +4,6 @@
 [![codecov](https://codecov.io/gh/ivanallen/autumn/branch/master/graph/badge.svg)](https://codecov.io/gh/ivanallen/autumn)
 ![license](https://img.shields.io/badge/license-BSD2-green)
 ![platform](https://img.shields.io/badge/platform-linux%20%7C%20macos-lightgrey)
-![starts](https://img.shields.io/github/stars/ivanallen/autumn?style=social)
 
 An easy interpreter to learn.
 
@@ -13,6 +12,7 @@ An easy interpreter to learn.
 ## Features
 
 - Modern C++ style(Based on C++17)
+- Support Linux and MacOS
 - Full comments
 - Support debug in repl
 
@@ -21,6 +21,10 @@ An easy interpreter to learn.
 - Higher-order functions supported
 
 ![example3](https://github.com/ivanallen/autumn/blob/master/docs/images/example3.png)
+
+- Closure supported
+
+![example3](https://github.com/ivanallen/autumn/blob/master/docs/images/example4.png)
 
 - ...
 
