@@ -4,9 +4,6 @@
 namespace autumn {
 
 Evaluator::Evaluator() :
-    _null(new object::Null()),
-    _true(new object::Boolean(true)),
-    _false(new object::Boolean(false)),
     _env(new object::Environment()) {
 }
  
@@ -74,7 +71,7 @@ std::shared_ptr<object::Object> Evaluator::eval(
 
     } else if (typeid(*node) == typeid(ast::BooleanLiteral)) {
         auto n = node->cast<ast::BooleanLiteral>();
-        return n->value() ? _true : _false;
+        return n->value() ? object::constants::True : object::constants::False;
 
     } else if (typeid(*node) == typeid(ast::StringLiteral)) {
         auto n = node->cast<ast::StringLiteral>();
@@ -170,7 +167,7 @@ std::shared_ptr<object::Object> Evaluator::eval_index_expression(
         }
 
         if (idx < 0 || idx >= elems.size()) {
-            return _null;
+            return object::constants::Null;
         }
 
         return elems[idx];
@@ -185,7 +182,7 @@ std::shared_ptr<object::Object> Evaluator::apply_function(
         const object::Object* fn,
         std::vector<std::shared_ptr<object::Object>>& args) const {
 
-    std::shared_ptr<object::Object> val = _null;
+    std::shared_ptr<object::Object> val = object::constants::Null;
 
     if (typeid(*fn) == typeid(object::Function)) {
         auto function = fn->cast<object::Function>();
@@ -195,6 +192,10 @@ std::shared_ptr<object::Object> Evaluator::apply_function(
     } else if (typeid(*fn) == typeid(object::Builtin)) {
         auto builtin_fn = fn->cast<object::Builtin>();
         val = builtin_fn->run(args);
+    }
+
+    if (val == nullptr) {
+        return nullptr;
     }
 
     if (typeid(*val) == typeid(object::ReturnValue)) {
@@ -275,6 +276,10 @@ std::shared_ptr<object::Object> Evaluator::eval_statments(
 
     for (auto& stat : statments) {
         result = eval(stat.get(), env);
+        if (result == nullptr) {
+            continue;
+        }
+
         if (typeid(*result) == typeid(object::ReturnValue)
                 || typeid(*result) == typeid(object::Error)) {
             return result;
@@ -301,14 +306,14 @@ std::shared_ptr<object::Object> Evaluator::eval_prefix_expression(
 }
 
 std::shared_ptr<object::Object> Evaluator::eval_bang_operator_expression(const object::Object* right) const {
-    if (right == _null.get()) {
-        return _true;
-    } else if (right == _true.get()) {
-        return _false;
-    } else if (right == _false.get()) {
-        return _true;
+    if (right == object::constants::Null.get()) {
+        return object::constants::True;
+    } else if (right == object::constants::True.get()) {
+        return object::constants::False;
+    } else if (right == object::constants::False.get()) {
+        return object::constants::True;
     }
-    return _false;
+    return object::constants::False;
 }
 
 std::shared_ptr<object::Object> Evaluator::eval_minus_prefix_operator_expression(const object::Object* right) const {
@@ -325,7 +330,7 @@ std::shared_ptr<object::Object> Evaluator::eval_minus_prefix_operator_expression
 
 
 std::shared_ptr<object::Object> Evaluator::native_bool_to_boolean_object(bool input) const {
-    return input ? _true : _false;
+    return input ? object::constants::True : object::constants::False;
 };
 
 std::shared_ptr<object::Object> Evaluator::eval_integer_infix_expression(
@@ -412,11 +417,11 @@ std::shared_ptr<object::Object> Evaluator::eval_infix_expression(
 }
 
 bool Evaluator::is_truthy(const object::Object* obj) const {
-    if (obj == _null.get()) {
+    if (obj == object::constants::Null.get()) {
         return false;
-    } else if (obj == _true.get()) {
+    } else if (obj == object::constants::True.get()) {
         return true;
-    } else if (obj == _false.get()) {
+    } else if (obj == object::constants::False.get()) {
         return false;
     }
     return true;
@@ -426,7 +431,7 @@ std::shared_ptr<object::Object> Evaluator::eval_if_expression(
             const ast::IfExpression* exp,
             std::shared_ptr<object::Environment>& env) const {
     if (exp->condition() == nullptr) {
-        return _null;
+        return object::constants::Null;
     }
     auto condition = eval(exp->condition(), env);
     if (is_error(condition.get())) {
@@ -439,7 +444,7 @@ std::shared_ptr<object::Object> Evaluator::eval_if_expression(
         return eval(exp->alternative(), env);
     }
 
-    return _null;
+    return object::constants::Null;
 }
 
 } // namespace autumn

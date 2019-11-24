@@ -2,10 +2,6 @@
 #include <string>
 #include <tuple>
 #include <gtest/gtest.h>
-
-// for test
-#define private public
-
 #include "evaluator.h"
 
 using namespace autumn;
@@ -311,31 +307,6 @@ TEST(Evaluator, TestStringConcatenation) {
     Evaluator evaluator;
     auto object = evaluator.eval(input);
     test_string_object(object.get(), "hello world");
-}
-
-TEST(Evaluator, TestBuiltinFunctions) {
-    std::vector<std::tuple<std::string, std::any>> tests = {
-        {R"(len(""))", 0},
-        {R"(len("hello world"))", 11},
-        {R"(len(1))", "argument to `len` not supported, got INTEGER"},
-        {R"(len("one", "two"))", "wrong number of arguments. expected 1, got 2"},
-    };
-
-    Evaluator evaluator;
-
-    for (auto& test : tests) {
-        auto& input = std::get<0>(test);
-        auto& expect = std::get<1>(test);
-
-        evaluator.reset_env();
-        auto object = evaluator.eval(input);
-
-        if (expect.type() == typeid(int)) {
-            test_integer_object(object.get(), std::any_cast<int>(expect));
-        } else {
-            test_error_object(object.get(), std::any_cast<const char*>(expect));
-        }
-    }
 }
 
 TEST(Evaluator, TestArrayLiteral) {

@@ -12,7 +12,7 @@ all:prepare-dep test
 
 prepare-dep:$(DEPS)
 
-test:format_test lexer_test parser_test evaluator_test
+test:format_test lexer_test parser_test evaluator_test builtin_test
 	@for bin in $^; do AUTUMN_COLOR_OFF=1 ./$$bin; done
 
 format_test:format_test.o $(DEPS)
@@ -25,6 +25,9 @@ parser_test:parser_test.o $(DEPS)
 	$(CXX) -o $@ $< $(LDFLAGS)
 
 evaluator_test:evaluator_test.o $(DEPS)
+	$(CXX) -o $@ $< $(LDFLAGS)
+
+builtin_test:builtin_test.o $(DEPS)
 	$(CXX) -o $@ $< $(LDFLAGS)
 
 %.o:%.cc
