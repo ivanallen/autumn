@@ -23,6 +23,7 @@ public:
         FUNCTION_OBJECT,
         BUILTIN_OBJECT,
         ARRAY_OBJECT,
+        HASH_OBJECT,
     };
 
     Type(TypeValue type) : _type(type) {
@@ -44,6 +45,12 @@ private:
     static std::unordered_map<int, std::string> _type_to_name;
 
     TypeValue _type;
+};
+
+class Hasher {
+public:
+    virtual ~Hasher() {}
+    virtual size_t hash() const = 0;
 };
 
 class Object {
@@ -72,7 +79,15 @@ protected:
     Type _type;
 };
 
-class Integer : public Object {
+namespace constants {
+
+extern std::shared_ptr<object::Object> Null;
+extern std::shared_ptr<object::Object> True;
+extern std::shared_ptr<object::Object> False;
+
+} // namespace constants
+
+class Integer : public Object, public Hasher {
 public:
     Integer(int value) :
             Object(Type::INTEGER_OBJECT),
@@ -87,11 +102,15 @@ public:
     int value() const {
         return _value;
     }
+
+    size_t hash() const override {
+        return std::hash<int>{}(_value);
+    }
 private:
     int _value = 0;
 };
 
-class Boolean : public Object {
+class Boolean : public Object, public Hasher {
 public:
     Boolean(bool value) :
             Object(Type::BOOLEAN_OBJECT),
@@ -106,11 +125,15 @@ public:
     bool value() const {
         return _value;
     }
+
+    size_t hash() const override {
+        return std::hash<bool>{}(_value);
+    }
 private:
     bool _value = 0;
 };
 
-class String: public Object {
+class String: public Object, public Hasher {
 public:
     String(const std::string& value) :
             Object(Type::STRING_OBJECT),
@@ -126,6 +149,10 @@ public:
 
     const std::string& value() const {
         return _value;
+    }
+
+    size_t hash() const override {
+        return std::hash<std::string>{}(_value);
     }
 private:
     std::string _value;
@@ -244,7 +271,7 @@ public:
         return color::cyan + "builtin function" + color::off;
     }
 
-    std::shared_ptr<object::Object> run(const std::vector<std::shared_ptr<object::Object>>& args) const {
+    std::shared_ptr<Object> run(const std::vector<std::shared_ptr<Object>>& args) const {
         return _fn(args);
     }
 private:
@@ -253,7 +280,7 @@ private:
 
 class Array : public Object {
 public:
-    Array(const std::vector<std::shared_ptr<object::Object>>& elements) :
+    Array(const std::vector<std::shared_ptr<Object>>& elements) :
         Object(Type::ARRAY_OBJECT),
         _elements(elements) {
     }
@@ -275,7 +302,7 @@ public:
         return ret;
     }
 
-    const std::vector<std::shared_ptr<object::Object>>& elements() const {
+    const std::vector<std::shared_ptr<Object>>& elements() const {
         return _elements;
     }
 
@@ -283,16 +310,70 @@ public:
         _elements.push_back(obj);
     }
 private:
-    std::vector<std::shared_ptr<object::Object>> _elements;
+    std::vector<std::shared_ptr<Object>> _elements;
 };
 
-namespace constants {
+class Hash : public Object {
+public:
+    using Pair = std::pair<std::shared_ptr<Object>, std::shared_ptr<Object>>;
+    using Pairs = std::unordered_map<size_t, Pair>;
 
-extern std::shared_ptr<object::Object> Null;
-extern std::shared_ptr<object::Object> True;
-extern std::shared_ptr<object::Object> False;
+    Hash(const Pairs& pairs) :
+        Object(Type::HASH_OBJECT),
+        _pairs(pairs) {
+    }
 
-} // namespace constants
+    Hash() : Object(Type::HASH_OBJECT) {
+    }
+
+    std::string inspect() const override {
+        std::string ret;
+        ret.append(1, '{');
+        bool first = true;
+        for (auto& pair : _pairs) {
+            if (!first) {
+                ret.append(", ");
+            }
+            first = false;
+            ret.append(format("{}:{}",
+                    pair.second.first->inspect(),
+                    pair.second.second->inspect()));
+        }
+        ret.append(1, '}');
+        return ret;
+    }
+
+    const Pairs& pairs() const {
+        return _pairs;
+    }
+
+    const std::shared_ptr<Object>& get(const std::shared_ptr<Object>& key) const {
+        auto hasher = key->cast<Hasher>();
+        if (hasher == nullptr) {
+            return constants::Null;
+        }
+
+        size_t hashcode = hasher->hash();
+        auto it = _pairs.find(hashcode);
+        if (it == _pairs.end()) {
+            return constants::Null;
+        }
+
+        return it->second.second;
+    }
+
+    bool append(const std::shared_ptr<Object>& key, const std::shared_ptr<Object>& value) {
+        auto hasher = key->cast<Hasher>();
+        if (hasher == nullptr) {
+            return false;
+        }
+
+        _pairs.emplace(hasher->hash(), std::make_pair(key, value));
+        return true;
+    }
+private:
+    Pairs _pairs;
+};
 
 } // namespace object
 } // namespace autumn

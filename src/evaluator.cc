@@ -85,6 +85,10 @@ std::shared_ptr<object::Object> Evaluator::eval(
         }
         return std::make_shared<object::Array>(elems);
 
+    } else if (typeid(*node) == typeid(ast::HashLiteral)) {
+        auto n = node->cast<ast::HashLiteral>();
+        return eval_hash_literal(n, env);
+
     } else if (typeid(*node) == typeid(ast::PrefixExpression)) {
         auto n = node->cast<ast::PrefixExpression>();
         auto right = eval(n->right(), env);
@@ -445,6 +449,32 @@ std::shared_ptr<object::Object> Evaluator::eval_if_expression(
     }
 
     return object::constants::Null;
+}
+
+std::shared_ptr<object::Object> Evaluator::eval_hash_literal(
+            const ast::HashLiteral* exp,
+            std::shared_ptr<object::Environment>& env) const {
+    auto ret = std::make_shared<object::Hash>();
+
+    auto& pairs = exp->pairs();
+    // std::pair<std::unique_ptr<ast::Expression>, std::unique_ptr<ast::Expression>>
+    for (auto& pair : pairs) {
+        auto key = eval(pair.first.get(), env);
+
+        if (key == nullptr) {
+            return nullptr;
+        }
+
+        auto val = eval(pair.second.get(), env);
+
+        if (val == nullptr) {
+            return nullptr;
+        }
+
+        ret->append(key, val);
+    }
+
+    return ret;
 }
 
 } // namespace autumn
