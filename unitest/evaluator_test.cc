@@ -359,4 +359,24 @@ TEST(Evaluator, TestIndexExpression) {
     }
 }
 
+TEST(Evaluator, TestHashLiteral) {
+    /*
+    std::string input = "";
+    Evaluator evaluator;
+    auto object = evaluator.eval(input);
+
+    ASSERT_TRUE(object != nullptr);
+
+    ASSERT_EQ(object->type(), object::Type::ARRAY_OBJECT);
+    auto array_obj = object->cast<object::Array>();
+    ASSERT_EQ(3u, array_obj->elements().size());
+
+    EXPECT_STREQ("[1, 4, 9]", array_obj->inspect().c_str());
+
+    test_integer_object(array_obj->elements()[0].get(), 1);
+    test_integer_object(array_obj->elements()[1].get(), 4);
+    test_integer_object(array_obj->elements()[2].get(), 9);
+    */
+}
+
 }

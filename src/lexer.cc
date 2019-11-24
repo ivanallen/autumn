@@ -83,6 +83,9 @@ Token Lexer::next_token() {
     case ',':
         token = Token{Token::COMMA, ","};
         break;
+    case ':':
+        token = Token{Token::COLON, ":"};
+        break;
     case ';':
         token = Token{Token::SEMICOLON, ";"};
         break;

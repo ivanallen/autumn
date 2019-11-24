@@ -505,6 +505,47 @@ private:
     std::vector<std::unique_ptr<Expression>> _elements;
 };
 
+class HashLiteral : public Expression {
+public:
+    friend class autumn::Parser;
+    using Expression::Expression;
+    using Pair = std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>;
+    using Pairs = std::vector<Pair>;
+
+    const Pairs& pairs() const {
+        return _pairs;
+    }
+
+    std::string to_string() const override {
+        std::string ret;
+
+        ret.append(1, '{');
+
+        for (size_t i = 0; i < _pairs.size(); ++i) {
+            if (i != 0) {
+                ret.append(", ");
+            }
+            ret.append(format("{}:{}",
+                    _pairs[i].first->to_string(),
+                    _pairs[i].second->to_string()));
+        }
+
+        ret.append(1, '}');
+        return ret;
+    }
+
+private:
+    void set_pairs(Pairs&& pairs) {
+        _pairs = std::move(pairs);
+    }
+
+    void add_pair(Pair&& pair) {
+        _pairs.emplace_back(std::move(pair));
+    }
+private:
+    Pairs _pairs;
+};
+
 class IndexExpression : public Expression {
 public:
     friend class autumn::Parser;

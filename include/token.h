@@ -28,6 +28,7 @@ struct Token {
         LBRACKET,
         RBRACKET,
         COMMA,
+        COLON,
         SEMICOLON,
         LET,
         IDENT,
