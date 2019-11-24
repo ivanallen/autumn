@@ -22,6 +22,7 @@ std::unordered_map<int, std::string> Type::_type_to_name = {
     {FUNCTION_OBJECT, "FUNCTION"},
     {BUILTIN_OBJECT, "BUILTIN"},
     {ARRAY_OBJECT, "ARRAY"},
+    {HASH_OBJECT, "HASH"},
 };
 
 std::ostream& operator<<(std::ostream& out, const Type& type) {

@@ -3,6 +3,7 @@
 #include <typeinfo>
 
 namespace autumn {
+namespace typeinfo {
 
 using TypeInfoRef = std::reference_wrapper<const std::type_info>;
 
@@ -18,4 +19,5 @@ struct EqualTo {
     }
 };
 
-} // namespace
+} // namespace typeinfo
+} // namespace typeinfo

@@ -360,23 +360,21 @@ TEST(Evaluator, TestIndexExpression) {
 }
 
 TEST(Evaluator, TestHashLiteral) {
-    /*
-    std::string input = "";
+    std::string input = R"(let two = "two"; { "one": 10 - 9, two: 1 + 1, "thr" + "ee": 6 / 2, 4: 4, true: 5, false: 6 })";
     Evaluator evaluator;
     auto object = evaluator.eval(input);
 
     ASSERT_TRUE(object != nullptr);
 
-    ASSERT_EQ(object->type(), object::Type::ARRAY_OBJECT);
-    auto array_obj = object->cast<object::Array>();
-    ASSERT_EQ(3u, array_obj->elements().size());
+    ASSERT_EQ(object->type(), object::Type::HASH_OBJECT);
+    auto hash_obj = object->cast<object::Hash>();
 
-    EXPECT_STREQ("[1, 4, 9]", array_obj->inspect().c_str());
-
-    test_integer_object(array_obj->elements()[0].get(), 1);
-    test_integer_object(array_obj->elements()[1].get(), 4);
-    test_integer_object(array_obj->elements()[2].get(), 9);
-    */
+    test_integer_object(hash_obj->get(std::make_unique<object::String>("one")).get(), 1);
+    test_integer_object(hash_obj->get(std::make_unique<object::String>("two")).get(), 2);
+    test_integer_object(hash_obj->get(std::make_unique<object::String>("three")).get(), 3);
+    test_integer_object(hash_obj->get(std::make_unique<object::Integer>(4)).get(), 4);
+    test_integer_object(hash_obj->get(std::make_unique<object::Boolean>(true)).get(), 5);
+    test_integer_object(hash_obj->get(std::make_unique<object::Boolean>(false)).get(), 6);
 }
 
 }
