@@ -4,6 +4,14 @@
 namespace autumn {
 namespace object {
 
+namespace constants {
+
+std::shared_ptr<object::Object> Null(new object::Null);
+std::shared_ptr<object::Object> True(new object::Boolean(true));
+std::shared_ptr<object::Object> False(new object::Boolean(false));
+
+} // namespace constants
+
 std::unordered_map<int, std::string> Type::_type_to_name = {
     {INTEGER_OBJECT, "INTEGER"},
     {BOOLEAN_OBJECT, "BOOLEAN"},

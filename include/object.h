@@ -258,6 +258,10 @@ public:
         _elements(elements) {
     }
 
+    Array() :
+        Object(Type::ARRAY_OBJECT) {
+    }
+
     std::string inspect() const override {
         std::string ret;
         ret.append(1, '[');
@@ -274,9 +278,21 @@ public:
     const std::vector<std::shared_ptr<object::Object>>& elements() const {
         return _elements;
     }
+
+    void append(const std::shared_ptr<object::Object>& obj) {
+        _elements.push_back(obj);
+    }
 private:
     std::vector<std::shared_ptr<object::Object>> _elements;
 };
+
+namespace constants {
+
+extern std::shared_ptr<object::Object> Null;
+extern std::shared_ptr<object::Object> True;
+extern std::shared_ptr<object::Object> False;
+
+} // namespace constants
 
 } // namespace object
 } // namespace autumn

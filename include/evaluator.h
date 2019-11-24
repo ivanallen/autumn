@@ -75,9 +75,6 @@ private:
     }
 private:
     Parser _parser;
-    std::shared_ptr<object::Object> _null;
-    std::shared_ptr<object::Object> _true;
-    std::shared_ptr<object::Object> _false;
     mutable std::shared_ptr<object::Environment> _env;
 };
 
