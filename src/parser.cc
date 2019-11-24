@@ -1,4 +1,6 @@
 #include "parser.h"
+
+#include <unordered_map>
 #include "defer.h"
 
 namespace autumn {
@@ -303,6 +305,10 @@ std::unique_ptr<ast::Expression> Parser::parse_function_literal() {
     }
 
     auto body = parse_block_statment();
+    if (body == nullptr) {
+        return nullptr;
+    }
+
     function_literal->set_body(body.release());
     return function_literal;
 }

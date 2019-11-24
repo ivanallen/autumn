@@ -3,6 +3,8 @@
 [![Build Status](https://travis-ci.com/ivanallen/autumn.svg?branch=master)](https://travis-ci.com/ivanallen/autumn)
 [![codecov](https://codecov.io/gh/ivanallen/autumn/branch/master/graph/badge.svg)](https://codecov.io/gh/ivanallen/autumn)
 ![license](https://img.shields.io/badge/license-BSD2-green)
+![platform](https://img.shields.io/badge/platform-linux%20%7C%20macos-lightgrey)
+![starts](https://img.shields.io/github/stars/ivanallen/autumn?style=social)
 
 An easy interpreter to learn.
 

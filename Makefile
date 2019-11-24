@@ -1,4 +1,4 @@
-CXXFLAGS=-g -std=c++17 -Werror -I./include
+CXXFLAGS=-g -std=c++17 -Werror -Wno-potentially-evaluated-expression -I./include
 LDFLAGS=
 
 ifdef CODECOV

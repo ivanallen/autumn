@@ -82,8 +82,7 @@ void eval_repl(const std::string& line) {
         return;
     }
 
-    std::cout << obj->inspect();
-    std::cout << autumn::color::off << std::endl;
+    std::cout << obj->inspect() << std::endl;
 }
 
 void do_nothing(const std::string& line) {

@@ -20,9 +20,8 @@ public:
 
     std::function<void()> trace(const std::string& message, const std::string& token_literal) {
         ++_level;
-        print(format("{}BEGIN{} {}: {}{}{}",
+        print(format("{:dark}BEGIN: {:message}: {:yellow}{:token}{:off}",
                     color::dark::dark,
-                    color::off,
                     message,
                     color::dark::yellow,
                     token_literal,
@@ -31,9 +30,8 @@ public:
     }
 
     void untrace(const std::string& message, const std::string& token_literal) {
-        print(format("{}END{} {}: {}{}{}",
+        print(format("{:dark}END: {:message}: {:yellow}{:token}{:off}",
                     color::dark::dark,
-                    color::off,
                     message,
                     color::dark::yellow,
                     token_literal,

@@ -167,7 +167,7 @@ public:
     }
 
     std::string inspect() const override {
-        return format("{}error:{}",
+        return format("{}error:{} {}",
                 color::light::red,
                 color::off,
                 _message);
