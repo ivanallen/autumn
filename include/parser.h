@@ -56,6 +56,7 @@ private:
     std::unique_ptr<ast::Expression> parse_boolean_literal();
     std::unique_ptr<ast::Expression> parse_function_literal();
     std::unique_ptr<ast::Expression> parse_array_literal();
+    std::unique_ptr<ast::Expression> parse_hash_literal();
     std::unique_ptr<ast::Expression> parse_group_expression();
     std::unique_ptr<ast::Expression> parse_prefix_expression();
     std::unique_ptr<ast::Expression> parse_if_expression();

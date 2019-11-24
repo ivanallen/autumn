@@ -37,6 +37,7 @@ Parser::Parser() {
     _prefix_parse_funcs[Token::MINUS] = std::bind(&Parser::parse_prefix_expression, this);
     _prefix_parse_funcs[Token::IF] = std::bind(&Parser::parse_if_expression, this);
     _prefix_parse_funcs[Token::LBRACKET] = std::bind(&Parser::parse_array_literal, this);
+    _prefix_parse_funcs[Token::LBRACE] = std::bind(&Parser::parse_hash_literal, this);
 
     // 注册中缀解析函数
     _infix_parse_funcs[Token::PLUS] = std::bind(&Parser::parse_infix_expression, this, _1);
@@ -249,10 +250,51 @@ std::unique_ptr<ast::Expression> Parser::parse_integer_literal() {
 
 std::unique_ptr<ast::Expression> Parser::parse_array_literal() {
     Defer defer(_tracer.trace(__FUNCTION__, _current_token.literal));
-    std::unique_ptr<ast::ArrayLiteral> arr(new ast::ArrayLiteral(_current_token));
+    std::unique_ptr<ast::ArrayLiteral> array_literal(new ast::ArrayLiteral(_current_token));
     auto elems = parse_expression_list(Token::RBRACKET);
-    arr->set_elements(std::move(elems));
-    return arr;
+    array_literal->set_elements(std::move(elems));
+    return array_literal;
+}
+
+std::unique_ptr<ast::Expression> Parser::parse_hash_literal() {
+    Defer defer(_tracer.trace(__FUNCTION__, _current_token.literal));
+    std::unique_ptr<ast::HashLiteral> hash_literal(new ast::HashLiteral(_current_token));
+
+    if (peek_token_is(Token::RBRACE)) {
+        next_token();
+        return hash_literal;
+    }
+
+    next_token();
+    auto key = parse_expression(Precedence::LOWEST);
+    if (!expect_peek(Token::COLON)) {
+        return nullptr;
+    }
+
+    next_token();
+    auto value = parse_expression(Precedence::LOWEST);
+
+    hash_literal->add_pair({std::move(key), std::move(value)});
+
+    while (peek_token_is(Token::COMMA)) {
+        next_token();
+        next_token();
+
+        auto key = parse_expression(Precedence::LOWEST);
+        if (!expect_peek(Token::COLON)) {
+            return nullptr;
+        }
+
+        next_token();
+        auto value = parse_expression(Precedence::LOWEST);
+
+        hash_literal->add_pair({std::move(key), std::move(value)});
+    }
+
+    if (!expect_peek(Token::RBRACE)) {
+        return nullptr;
+    }
+    return hash_literal;
 }
 
 std::unique_ptr<ast::Expression> Parser::parse_string_literal() {

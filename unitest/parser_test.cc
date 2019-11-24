@@ -35,6 +35,13 @@ void test_literal(const std::any& expect, const Expression* exp) {
     }
 }
 
+void test_string_literal(const std::string& expect, const Expression* exp) {
+    ASSERT_TRUE(exp != nullptr);
+    auto string_literal = exp->cast<StringLiteral>();
+    ASSERT_TRUE(string_literal != nullptr);
+    EXPECT_EQ(expect, string_literal->value());
+}
+
 void test_infix_expression(
         const std::any& left_expect,
         const std::string& op_expect,
@@ -552,6 +559,90 @@ TEST(Parser, TestParsingArrayLiteral) {
     test_literal(1, elems[0].get());
     test_infix_expression(2, "*", 2, elems[1].get());
     test_infix_expression(3, "+", 3, elems[2].get());
+}
+
+TEST(Parser, TestParsingHashLiteral) {
+    std::string input = R"({"one":1, "two":2, "three":3})";
+
+    Parser parser;
+    auto program = parser.parse(input);
+    for (auto& error : parser.errors()) {
+        std::cout << error << std::endl;
+    }
+    ASSERT_TRUE(program != nullptr);
+
+    auto& statments = program->statments();
+    ASSERT_EQ(1u, statments.size());
+    auto stmt = statments[0]->cast<ExpressionStatment>();
+    ASSERT_TRUE(stmt != nullptr);
+    auto exp = stmt->expression();
+    ASSERT_TRUE(exp != nullptr);
+    auto hash_literal = exp->cast<HashLiteral>();
+    ASSERT_TRUE(hash_literal != nullptr);
+
+    auto& pairs = hash_literal->pairs();
+
+    ASSERT_EQ(3u, pairs.size());
+    test_string_literal("one", pairs[0].first.get());
+    test_literal(1, pairs[0].second.get());
+    test_string_literal("two", pairs[1].first.get());
+    test_literal(2, pairs[1].second.get());
+    test_string_literal("three", pairs[2].first.get());
+    test_literal(3, pairs[2].second.get());
+}
+
+TEST(Parser, TestParsingEmptyHashLiteral) {
+    std::string input = R"({})";
+
+    Parser parser;
+    auto program = parser.parse(input);
+    for (auto& error : parser.errors()) {
+        std::cout << error << std::endl;
+    }
+    ASSERT_TRUE(program != nullptr);
+
+    auto& statments = program->statments();
+    ASSERT_EQ(1u, statments.size());
+    auto stmt = statments[0]->cast<ExpressionStatment>();
+    ASSERT_TRUE(stmt != nullptr);
+    auto exp = stmt->expression();
+    ASSERT_TRUE(exp != nullptr);
+    auto hash_literal = exp->cast<HashLiteral>();
+    ASSERT_TRUE(hash_literal != nullptr);
+
+    auto& pairs = hash_literal->pairs();
+
+    EXPECT_EQ(0u, pairs.size());
+}
+
+TEST(Parser, TestParsingHashLiteralWithExpressions) {
+    std::string input = R"({"one":1 + 2, "two":2 * 3, "three":10 / 2})";
+
+    Parser parser;
+    auto program = parser.parse(input);
+    for (auto& error : parser.errors()) {
+        std::cout << error << std::endl;
+    }
+    ASSERT_TRUE(program != nullptr);
+
+    auto& statments = program->statments();
+    ASSERT_EQ(1u, statments.size());
+    auto stmt = statments[0]->cast<ExpressionStatment>();
+    ASSERT_TRUE(stmt != nullptr);
+    auto exp = stmt->expression();
+    ASSERT_TRUE(exp != nullptr);
+    auto hash_literal = exp->cast<HashLiteral>();
+    ASSERT_TRUE(hash_literal != nullptr);
+
+    auto& pairs = hash_literal->pairs();
+
+    ASSERT_EQ(3u, pairs.size());
+    test_string_literal("one", pairs[0].first.get());
+    test_infix_expression(1, "+", 2, pairs[0].second.get());
+    test_string_literal("two", pairs[1].first.get());
+    test_infix_expression(2, "*", 3, pairs[1].second.get());
+    test_string_literal("three", pairs[2].first.get());
+    test_infix_expression(10, "/", 2, pairs[2].second.get());
 }
 
 TEST(Parser, TestIndexExpression) {

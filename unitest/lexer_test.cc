@@ -109,6 +109,7 @@ TEST(Lexer, TestNontrivial) {
         "foobar"
         "foo bar"
         [1, 2]
+        {"foo": "bar"}
     )";
 
     Token expect_tokens[] = {
@@ -199,6 +200,11 @@ TEST(Lexer, TestNontrivial) {
         {Token::COMMA, ","},
         {Token::INT, "2"},
         {Token::RBRACKET, "]"},
+        {Token::LBRACE, "{"},
+        {Token::STRING, "foo"},
+        {Token::COLON, ":"},
+        {Token::STRING, "bar"},
+        {Token::RBRACE, "}"},
         {Token::END, ""},
     };
 
