@@ -10,6 +10,7 @@ std::map<std::string, object::BuiltinFunction> BUILTINS = {
     {"last", last},
     {"push", push},
     {"rest", rest},
+    {"puts", puts},
 };
 
 std::shared_ptr<object::Object> len(const std::vector<std::shared_ptr<object::Object>>& args) {
@@ -104,6 +105,13 @@ std::shared_ptr<object::Object> rest(const std::vector<std::shared_ptr<object::O
         return new_obj;
     }
     return std::make_shared<object::Error>(format("argument to `push` not supported, got {}", arg->type()));
+}
+
+std::shared_ptr<object::Object> puts(const std::vector<std::shared_ptr<object::Object>>& args) {
+    for (auto& e : args) {
+        std::cout << e->inspect() << std::endl;
+    }
+    return object::constants::Null;
 }
 
 } // namespace builtin

@@ -156,4 +156,13 @@ TEST(Builtin, TestPush) {
     }
 }
 
+// puts 的返回值是 null
+// 这个单元测试只是增加覆盖率
+TEST(Builtin, TestPuts) {
+    std::string input = R"(let a = [1, 2, "hello autumn"]; puts(a))";
+    Evaluator evaluator;
+    auto obj = evaluator.eval(input);
+    test_null_object(obj.get());
+}
+
 }
