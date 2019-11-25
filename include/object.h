@@ -347,7 +347,7 @@ public:
         return _pairs;
     }
 
-    const std::shared_ptr<Object>& get(const std::shared_ptr<Object>& key) const {
+    const std::shared_ptr<Object>& get(const Object* key) const {
         auto hasher = key->cast<Hasher>();
         if (hasher == nullptr) {
             return constants::Null;

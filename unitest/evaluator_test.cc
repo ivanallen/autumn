@@ -339,6 +339,7 @@ TEST(Evaluator, TestIndexExpression) {
         {"let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i]", 2},
         {"[1, 2, 3][3]", nullptr},
         {"[1, 2, 3][-1]", 3},
+        {R"(let a = {"name":"autumn", age: 1}; a["name"])", "autumn"},
     };
 
     Evaluator evaluator;
@@ -351,6 +352,8 @@ TEST(Evaluator, TestIndexExpression) {
 
         if (expect.type() == typeid(int)) {
             test_integer_object(object.get(), std::any_cast<int>(expect));
+        } else if (expect.type() == typeid(const char*)) {
+            test_string_object(object.get(), std::string(std::any_cast<const char*>(expect)));
         } else if (expect.type() == typeid(std::nullptr_t)) {
             test_null_object(object.get());
         } else {
@@ -369,12 +372,12 @@ TEST(Evaluator, TestHashLiteral) {
     ASSERT_EQ(object->type(), object::Type::HASH_OBJECT);
     auto hash_obj = object->cast<object::Hash>();
 
-    test_integer_object(hash_obj->get(std::make_unique<object::String>("one")).get(), 1);
-    test_integer_object(hash_obj->get(std::make_unique<object::String>("two")).get(), 2);
-    test_integer_object(hash_obj->get(std::make_unique<object::String>("three")).get(), 3);
-    test_integer_object(hash_obj->get(std::make_unique<object::Integer>(4)).get(), 4);
-    test_integer_object(hash_obj->get(std::make_unique<object::Boolean>(true)).get(), 5);
-    test_integer_object(hash_obj->get(std::make_unique<object::Boolean>(false)).get(), 6);
+    test_integer_object(hash_obj->get(std::make_unique<object::String>("one").get()).get(), 1);
+    test_integer_object(hash_obj->get(std::make_unique<object::String>("two").get()).get(), 2);
+    test_integer_object(hash_obj->get(std::make_unique<object::String>("three").get()).get(), 3);
+    test_integer_object(hash_obj->get(std::make_unique<object::Integer>(4).get()).get(), 4);
+    test_integer_object(hash_obj->get(std::make_unique<object::Boolean>(true).get()).get(), 5);
+    test_integer_object(hash_obj->get(std::make_unique<object::Boolean>(false).get()).get(), 6);
 }
 
 }

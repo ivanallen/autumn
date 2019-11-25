@@ -156,11 +156,11 @@ std::shared_ptr<object::Object> Evaluator::eval(
 }
 
 std::shared_ptr<object::Object> Evaluator::eval_index_expression(
-        const object::Object* array,
+        const object::Object* obj,
         const object::Object* index) const {
-    if (typeid(*array) == typeid(object::Array)
+    if (typeid(*obj) == typeid(object::Array)
             && typeid(*index) == typeid(object::Integer)) {
-        auto a = array->cast<object::Array>();
+        auto a = obj->cast<object::Array>();
         auto i = index->cast<object::Integer>();
 
         auto& elems = a->elements();
@@ -175,10 +175,14 @@ std::shared_ptr<object::Object> Evaluator::eval_index_expression(
         }
 
         return elems[idx];
+    } else if (typeid(*obj) == typeid(object::Hash)) {
+        auto h = obj->cast<object::Hash>();
+        return h->get(index);
     }
+
     return new_error("index operator not supported: {}`{}`{}",
             color::light::light,
-            array->type(),
+            obj->type(),
             color::off);
 }
 
