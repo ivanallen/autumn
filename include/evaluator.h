@@ -60,7 +60,7 @@ private:
             const object::Function* fn,
             std::vector<std::shared_ptr<object::Object>>& args) const;
     std::shared_ptr<object::Object> eval_index_expression(
-            const object::Object* array,
+            const object::Object* obj,
             const object::Object* index) const;
 
     std::shared_ptr<object::Object> eval_hash_literal(
