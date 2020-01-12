@@ -115,10 +115,8 @@ let quickSort = fn(arr) {
         return arr;
     } else {
         let head = first(arr);
-        let smaller = filter(rest(arr), fn(x) { x <= head });
-        let bigger = filter(rest(arr), fn(x) { x > head });
-        let smaller = quickSort(smaller);
-        let bigger = quickSort(bigger);
+        let smaller = quickSort(filter(rest(arr), fn(x) { x <= head }));
+        let bigger = quickSort(filter(rest(arr), fn(x) { x > head }));
         return quickSort(smaller) + [head] + quickSort(bigger);
     }
 }
