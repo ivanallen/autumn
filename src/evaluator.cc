@@ -359,8 +359,12 @@ std::shared_ptr<object::Object> Evaluator::eval_integer_infix_expression(
         return std::make_shared<object::Integer>(left_val->value() / right_val->value());
     } else if (op == "<") {
         return native_bool_to_boolean_object(left_val->value() < right_val->value());
+    } else if (op == "<=") {
+        return native_bool_to_boolean_object(left_val->value() <= right_val->value());
     } else if (op == ">") {
         return native_bool_to_boolean_object(left_val->value() > right_val->value());
+    } else if (op == ">=") {
+        return native_bool_to_boolean_object(left_val->value() >= right_val->value());
     } else if (op == "==") {
         return native_bool_to_boolean_object(left_val->value() == right_val->value());
     } else if (op == "!=") {
@@ -391,6 +395,28 @@ std::shared_ptr<object::Object> Evaluator::eval_string_infix_expression(
             color::off);
 }
 
+std::shared_ptr<object::Object> Evaluator::eval_array_infix_expression(
+        const std::string& op,
+        const object::Object* left,
+        const object::Object* right,
+        std::shared_ptr<object::Environment>& env) const {
+    auto left_val = left->cast<object::Array>();
+    auto right_val = right->cast<object::Array>();
+
+    if (op == "+") {
+        auto ret = std::make_shared<object::Array>(left_val->elements());
+        for (auto& e : right_val->elements()) {
+            ret->append(e);
+        }
+        return ret;
+    }
+
+    return new_error("unknown operator: {}`{} {} {}`{}",
+            color::light::light,
+            left->type(), op, right->type(),
+            color::off);
+}
+
 std::shared_ptr<object::Object> Evaluator::eval_infix_expression(
         const std::string& op,
         const object::Object* left,
@@ -406,6 +432,9 @@ std::shared_ptr<object::Object> Evaluator::eval_infix_expression(
     } else if (typeid(*left) == typeid(object::String)
             && typeid(*right) == typeid(object::String)) {
         return eval_string_infix_expression(op, left, right, env);
+    } else if (typeid(*left) == typeid(object::Array)
+            && typeid(*right) == typeid(object::Array)) {
+        return eval_array_infix_expression(op, left, right, env);
     } else if (typeid(*left) != typeid(*right)) {
         return new_error("type mismatch: {}`{} {} {}`{}",
                 color::light::light,

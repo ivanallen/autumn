@@ -39,6 +39,11 @@ private:
             const object::Object* left,
             const object::Object* right,
             std::shared_ptr<object::Environment>& env) const;
+    std::shared_ptr<object::Object> eval_array_infix_expression(
+            const std::string& op,
+            const object::Object* left,
+            const object::Object* right,
+            std::shared_ptr<object::Environment>& env) const;
     std::shared_ptr<object::Object> eval_bang_operator_expression(
             const object::Object* right) const;
     std::shared_ptr<object::Object> eval_minus_prefix_operator_expression(const object::Object* right) const;
