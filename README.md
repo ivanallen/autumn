@@ -24,7 +24,7 @@ An easy interpreter to learn.
 
 - Closure supported
 
-![example3](https://github.com/ivanallen/autumn/blob/master/docs/images/example4.png)
+![example4](https://github.com/ivanallen/autumn/blob/master/docs/images/example4.png)
 
 - ...
 
@@ -82,6 +82,57 @@ $ DEBUG_AUTUMN=1 ./autumn parser
 ```
 $ ./autumn eval
 ```
+
+## Demo
+
+This is a quick sort source.
+
+- You need a filter function
+
+```js
+let filter = fn(arr, f) {
+    let iter = fn(arr, accumulated) {
+        if (len(arr) == 0) {
+            accumulated
+        } else {
+            let e = if (f(first(arr))) {
+                push(accumulated, first(arr));
+            } else {
+                accumulated
+            }
+            iter(rest(arr), e);
+        }
+    };
+    iter(arr, []);
+};
+```
+
+- QuickSort
+
+```js
+let quickSort = fn(arr) {
+    if (len(arr) == 0) {
+        return arr;
+    } else {
+        let head = first(arr);
+        let smaller = filter(rest(arr), fn(x) { x <= head });
+        let bigger = filter(rest(arr), fn(x) { x > head });
+        let smaller = quickSort(smaller);
+        let bigger = quickSort(bigger);
+        return quickSort(smaller) + [head] + quickSort(bigger);
+    }
+}
+```
+
+- Test
+
+```js
+let a = [4,5,3,4,6,6]
+quickSort(a)
+```
+
+![example5](https://github.com/ivanallen/autumn/blob/master/docs/images/example5.png)
+
 
 ## Contributor
 
