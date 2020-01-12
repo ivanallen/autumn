@@ -309,6 +309,14 @@ TEST(Evaluator, TestStringConcatenation) {
     test_string_object(object.get(), "hello world");
 }
 
+TEST(Evaluator, TestArrayConcatenation) {
+    std::string input = "[1,2,3,4] + [3,4,5]";
+    Evaluator evaluator;
+    auto object = evaluator.eval(input);
+    EXPECT_STREQ(object->inspect().c_str(), "[1, 2, 3, 4, 3, 4, 5]");
+}
+
+
 TEST(Evaluator, TestArrayLiteral) {
     std::string input = "[1, 2 + 2, 3 * 3]";
     Evaluator evaluator;

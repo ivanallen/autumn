@@ -13,6 +13,8 @@ const std::unordered_map<Token::Type, Parser::Precedence> PRECEDENCES = {
     {Token::NEQ, Parser::Precedence::EQUALS},
     {Token::LT, Parser::Precedence::LESSGREATER},
     {Token::GT, Parser::Precedence::LESSGREATER},
+    {Token::LTE, Parser::Precedence::LESSGREATER},
+    {Token::GTE, Parser::Precedence::LESSGREATER},
     {Token::PLUS, Parser::Precedence::SUM},
     {Token::MINUS, Parser::Precedence::SUM},
     {Token::SLASH, Parser::Precedence::PRODUCT},
@@ -48,6 +50,8 @@ Parser::Parser() {
     _infix_parse_funcs[Token::NEQ] = std::bind(&Parser::parse_infix_expression, this, _1);
     _infix_parse_funcs[Token::LT] = std::bind(&Parser::parse_infix_expression, this, _1);
     _infix_parse_funcs[Token::GT] = std::bind(&Parser::parse_infix_expression, this, _1);
+    _infix_parse_funcs[Token::LTE] = std::bind(&Parser::parse_infix_expression, this, _1);
+    _infix_parse_funcs[Token::GTE] = std::bind(&Parser::parse_infix_expression, this, _1);
     // 在 call 表达式中，形如 add(1, 2 * 3)，我们把 ( 看作是中缀操作符，且它有最高的优先级
     _infix_parse_funcs[Token::LPAREN] = std::bind(&Parser::parse_call_expression, this, _1);
     _infix_parse_funcs[Token::LBRACKET] = std::bind(&Parser::parse_index_expression, this, _1);
