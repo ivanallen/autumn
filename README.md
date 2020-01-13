@@ -85,7 +85,7 @@ $ ./autumn eval
 
 ## Demo
 
-This is a quick sort source.
+An example below showing how to write quick sort.
 
 - You need a filter function
 
@@ -122,8 +122,6 @@ let quickSort = fn(arr) {
 }
 ```
 
-- Test
-
 ```js
 let a = [4,5,3,4,6,6]
 quickSort(a)
@@ -142,7 +140,8 @@ This project maintained under BSD 2.
 
 ## Contact
 
-QQ Group: 610441700
+QQ Group for Autumn: 985682510
+QQ Group for Linuxers: 610441700
 
 ## References
 
